@@ -6,78 +6,170 @@
 <title>俱乐部大玩家 · 价值计算器</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft YaHei","SimHei",sans-serif;}
-body{background-color:#1c1a11;min-height:100vh;padding:10px 8px;}
-#authMask{position:fixed;top:0;left:0;width:100%;height:100%;background:#1c1a11;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;}
-.auth-box{width:100%;max-width:320px;background:#272418;border:1px solid #8b7034;border-radius:10px;padding:24px 18px;text-align:center;}
-.auth-icon{font-size:36px;margin-bottom:10px;}
-.auth-title{color:#e6c264;font-size:16px;font-weight:bold;margin-bottom:6px;}
-.auth-sub{color:#8a7d5a;font-size:11px;margin-bottom:18px;}
-.auth-input{width:100%;background:#14130d;border:1px solid #635024;color:#f0e8cc;padding:10px 12px;font-size:14px;border-radius:6px;outline:none;text-align:center;letter-spacing:2px;margin-bottom:10px;}
-.auth-input:focus{border-color:#d4b058;}
-.auth-btn{width:100%;padding:10px;background:linear-gradient(180deg,#6b5424,#5c4920);border:1px solid #b89242;color:#ffdd90;font-size:14px;border-radius:6px;cursor:pointer;}
-.auth-btn:hover{background:linear-gradient(180deg,#7d6328,#6b5424);}
-.auth-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.auth-err{color:#e88484;font-size:11px;margin-top:10px;min-height:16px;}
-.auth-qq{margin-top:16px;color:#6b6142;font-size:10px;}
-.main-box{max-width:380px;margin:0 auto;background:#272418;border:1px solid #8b7034;border-radius:10px;padding:14px;}
-.top-title{text-align:center;color:#e6c264;font-size:16px;font-weight:bold;margin-bottom:4px;letter-spacing:1px;}
-.top-sub{text-align:center;color:#8a7d5a;font-size:10px;margin-bottom:10px;}
+body{background-color:#0d0c08;min-height:100vh;padding:10px 8px;overflow-x:hidden;}
+
+/* ===== 粒子背景 ===== */
+#particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* ===== 激活爆发层 ===== */
+#burstCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1000;pointer-events:none;display:none;}
+
+/* ===== 登录页 ===== */
+#authMask{position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;
+background:radial-gradient(ellipse at center,#1a1710 0%,#0d0c08 70%);}
+.auth-box{width:100%;max-width:340px;position:relative;z-index:2;
+background:linear-gradient(145deg,rgba(39,36,24,0.95),rgba(20,18,12,0.98));
+border:1px solid rgba(212,176,88,0.3);border-radius:16px;padding:32px 24px;text-align:center;
+box-shadow:0 0 40px rgba(212,176,88,0.1),0 8px 32px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,221,144,0.1);
+animation:boxFloat 4s ease-in-out infinite;}
+@keyframes boxFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.auth-box::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;border-radius:18px;
+background:linear-gradient(135deg,rgba(212,176,88,0.4),transparent 40%,transparent 60%,rgba(212,176,88,0.2));
+z-index:-1;animation:borderGlow 3s ease-in-out infinite;}
+@keyframes borderGlow{0%,100%{opacity:0.6;}50%{opacity:1;}}
+.auth-icon{font-size:48px;margin-bottom:14px;filter:drop-shadow(0 0 12px rgba(255,215,0,0.5));animation:iconPulse 2s ease-in-out infinite;}
+@keyframes iconPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 12px rgba(255,215,0,0.5));}50%{transform:scale(1.08);filter:drop-shadow(0 0 20px rgba(255,215,0,0.8));}}
+.auth-title{
+background:linear-gradient(135deg,#ffdd90 0%,#d4b058 40%,#fff4d6 50%,#d4b058 60%,#b89242 100%);
+background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+font-size:22px;font-weight:bold;margin-bottom:8px;letter-spacing:3px;animation:titleShine 3s linear infinite;}
+@keyframes titleShine{to{background-position:200% center;}}
+.auth-sub{color:#8a7d5a;font-size:12px;margin-bottom:22px;letter-spacing:1px;}
+.auth-input{width:100%;background:rgba(20,19,13,0.8);border:1px solid rgba(99,80,36,0.6);color:#f0e8cc;
+padding:12px 14px;font-size:15px;border-radius:8px;outline:none;text-align:center;letter-spacing:3px;margin-bottom:14px;
+transition:all 0.3s ease;font-family:'Courier New',monospace;}
+.auth-input:focus{border-color:#d4b058;box-shadow:0 0 16px rgba(212,176,88,0.3),inset 0 0 8px rgba(212,176,88,0.1);background:rgba(20,19,13,0.95);}
+.auth-input::placeholder{color:#5a5240;letter-spacing:1px;}
+.auth-btn{width:100%;padding:12px;
+background:linear-gradient(180deg,#8b6f2e 0%,#6b5424 50%,#5c4920 100%);
+border:1px solid #b89242;color:#ffdd90;font-size:15px;border-radius:8px;cursor:pointer;
+letter-spacing:6px;font-weight:bold;transition:all 0.3s ease;position:relative;overflow:hidden;
+box-shadow:0 4px 16px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,221,144,0.2);}
+.auth-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left 0.5s;}
+.auth-btn:hover{background:linear-gradient(180deg,#9d7d36 0%,#7d6328 50%,#6b5424 100%);
+transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,176,88,0.3),inset 0 1px 0 rgba(255,221,144,0.3);}
+.auth-btn:hover::before{left:100%;}
+.auth-btn:active{transform:translateY(0);}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.auth-err{color:#e88484;font-size:12px;margin-top:12px;min-height:18px;text-shadow:0 0 8px rgba(232,132,132,0.3);}
+.auth-qq{margin-top:20px;color:#6b6142;font-size:11px;letter-spacing:1px;}
+.auth-qq span{color:#8a7d5a;}
+
+/* ===== 主界面 ===== */
+.main-box{max-width:380px;margin:0 auto;background:linear-gradient(145deg,rgba(39,36,24,0.95),rgba(26,23,14,0.98));
+border:1px solid rgba(139,112,52,0.4);border-radius:14px;padding:14px;position:relative;z-index:2;
+box-shadow:0 0 30px rgba(212,176,88,0.08),0 8px 32px rgba(0,0,0,0.4);
+animation:slideUp 0.6s cubic-bezier(0.16,1,0.3,1);}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.top-title{text-align:center;
+background:linear-gradient(135deg,#ffdd90,#d4b058 50%,#b89242);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+font-size:17px;font-weight:bold;margin-bottom:4px;letter-spacing:2px;}
+.top-sub{text-align:center;color:#8a7d5a;font-size:10px;margin-bottom:10px;letter-spacing:1px;}
 .author-line{text-align:center;color:#6b6142;font-size:10px;margin-bottom:10px;}
-.notice-bar{background:#2a1f12;border:1px solid #6b4a1e;border-radius:6px;padding:7px 10px;margin-bottom:10px;color:#d4a04a;font-size:10px;line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
-.notice-icon{color:#e8a838;font-size:11px;flex-shrink:0;}
+.notice-bar{background:linear-gradient(135deg,rgba(42,31,18,0.9),rgba(30,22,12,0.9));
+border:1px solid rgba(107,74,30,0.5);border-radius:8px;padding:8px 10px;margin-bottom:10px;color:#d4a04a;
+font-size:10px;line-height:1.6;display:flex;align-items:flex-start;gap:6px;
+box-shadow:inset 0 1px 0 rgba(212,160,74,0.1);}
+.notice-icon{color:#e8a838;font-size:12px;flex-shrink:0;animation:noticePulse 2s ease-in-out infinite;}
+@keyframes noticePulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 .tab-wrap{display:flex;gap:4px;margin-bottom:10px;}
-.tab-item{flex:1;text-align:center;padding:6px 2px;border:1px solid #635024;border-radius:6px;color:#b8a678;font-size:12px;cursor:pointer;background:#1e1b12;}
-.tab-item.active{background:#705928;border-color:#d4b058;color:#ffdd90;}
-.role-card{background:#1e1b12;border:1px solid #645126;border-radius:8px;padding:10px;margin-bottom:10px;}
-.role-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
-.role-avatar{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#3a6db5,#2a5494);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;}
-.role-name{color:#e6c264;font-size:13px;font-weight:bold;}
-.role-badge{display:inline-block;background:#3a6db5;color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px;}
-.role-tip{color:#9a8d68;font-size:10px;line-height:1.6;}
-.role-tip .highlight{color:#d4a843;}
+.tab-item{flex:1;text-align:center;padding:7px 2px;border:1px solid #635024;border-radius:7px;color:#b8a678;
+font-size:12px;cursor:pointer;background:linear-gradient(180deg,#1e1b12,#18160e);transition:all 0.25s ease;}
+.tab-item:hover{border-color:#8b7034;color:#d4b058;}
+.tab-item.active{background:linear-gradient(180deg,#705928,#5c4920);border-color:#d4b058;color:#ffdd90;
+box-shadow:0 0 12px rgba(212,176,88,0.2),inset 0 1px 0 rgba(255,221,144,0.2);}
+.role-card{background:linear-gradient(145deg,rgba(30,27,18,0.9),rgba(24,22,14,0.95));
+border:1px solid rgba(100,81,38,0.5);border-radius:10px;padding:12px;margin-bottom:10px;
+box-shadow:inset 0 1px 0 rgba(212,176,88,0.05);transition:all 0.3s ease;}
+.role-card:hover{border-color:rgba(212,176,88,0.4);box-shadow:0 0 16px rgba(212,176,88,0.1),inset 0 1px 0 rgba(212,176,88,0.1);}
+.role-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.role-avatar{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#3a6db5,#2a5494);
+color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;
+box-shadow:0 2px 8px rgba(58,109,181,0.3);}
+.role-name{color:#e6c264;font-size:14px;font-weight:bold;}
+.role-badge{display:inline-block;background:linear-gradient(135deg,#3a6db5,#2a5494);color:#fff;font-size:9px;
+padding:2px 6px;border-radius:4px;margin-left:4px;box-shadow:0 1px 4px rgba(58,109,181,0.3);}
+.role-tip{color:#9a8d68;font-size:10px;line-height:1.7;}
+.role-tip .highlight{color:#d4a843;font-weight:bold;}
 .mode-wrap{display:flex;gap:4px;margin-bottom:12px;}
-.mode-item{flex:1;text-align:center;padding:7px 2px;border:1px solid #635024;border-radius:6px;color:#b8a678;font-size:11px;cursor:pointer;background:#1e1b12;}
-.mode-item.active{background:#5c4920;border-color:#d4b058;color:#ffdd90;}
-.item-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:4px 6px;border-radius:6px;}
-.dot-wrap{display:flex;align-items:center;gap:6px;}
-.color-dot{width:9px;height:9px;border-radius:50%;}
-.dot-green{background:#4fc464;}.dot-blue{background:#4488dd;}.dot-purple{background:#aa62cc;}.dot-orange{background:#f09633;}.dot-red{background:#e24848;}.dot-car{background:#c8c8c8;}
+.mode-item{flex:1;text-align:center;padding:8px 2px;border:1px solid #635024;border-radius:7px;color:#b8a678;
+font-size:11px;cursor:pointer;background:linear-gradient(180deg,#1e1b12,#18160e);transition:all 0.25s ease;}
+.mode-item:hover{border-color:#8b7034;color:#d4b058;}
+.mode-item.active{background:linear-gradient(180deg,#5c4920,#4a3a1a);border-color:#d4b058;color:#ffdd90;
+box-shadow:0 0 10px rgba(212,176,88,0.15);}
+.item-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:5px 8px;
+border-radius:7px;transition:background 0.2s;}
+.item-row:hover{background:rgba(212,176,88,0.03);}
+.dot-wrap{display:flex;align-items:center;gap:7px;}
+.color-dot{width:10px;height:10px;border-radius:50%;box-shadow:0 0 6px currentColor;}
+.dot-green{background:#4fc464;color:#4fc464;}.dot-blue{background:#4488dd;color:#4488dd;}
+.dot-purple{background:#aa62cc;color:#aa62cc;}.dot-orange{background:#f09633;color:#f09633;}
+.dot-red{background:#e24848;color:#e24848;}.dot-car{background:#c8c8c8;color:#c8c8c8;}
 .txt-label{color:#d8c8a0;font-size:13px;}
-.item-row input{width:62px;background:#14130d;border:1px solid #635024;color:#f0e8cc;padding:5px 6px;font-size:13px;border-radius:5px;outline:none;text-align:center;}
-.item-row input:focus{border-color:#d4b058;}
-.divider{border:none;border-top:1px solid #4a3d1e;margin:8px 0;}
-.discount-row{margin:10px 0;padding:8px 10px;background:#17150e;border:1px solid #645126;border-radius:6px;}
-.discount-label{display:flex;justify-content:space-between;color:#b8a678;font-size:11px;margin-bottom:5px;}
-.discount-val{color:#ffd770;font-weight:bold;}
-.discount-row input[type=range]{width:100%;accent-color:#d4b058;height:4px;}
-.result-box{margin-top:12px;border:2px solid #d4b058;border-radius:8px;padding:10px 12px;background:#1a170e;}
-.result-area{display:flex;gap:8px;}
+.item-row input{width:68px;background:rgba(20,19,13,0.8);border:1px solid rgba(99,80,36,0.5);color:#f0e8cc;
+padding:6px 7px;font-size:13px;border-radius:6px;outline:none;text-align:center;transition:all 0.25s;}
+.item-row input:focus{border-color:#d4b058;box-shadow:0 0 10px rgba(212,176,88,0.2);background:rgba(20,19,13,0.95);}
+.divider{border:none;border-top:1px solid rgba(74,61,30,0.5);margin:10px 0;}
+.discount-row{margin:10px 0;padding:10px 12px;background:linear-gradient(135deg,rgba(23,21,14,0.9),rgba(18,16,10,0.95));
+border:1px solid rgba(100,81,38,0.4);border-radius:8px;}
+.discount-label{display:flex;justify-content:space-between;color:#b8a678;font-size:11px;margin-bottom:6px;}
+.discount-val{color:#ffd770;font-weight:bold;text-shadow:0 0 8px rgba(255,215,112,0.3);}
+.discount-row input[type=range]{width:100%;accent-color:#d4b058;height:5px;cursor:pointer;}
+.result-box{margin-top:14px;border:2px solid #d4b058;border-radius:10px;padding:12px 14px;
+background:linear-gradient(145deg,rgba(26,23,14,0.98),rgba(20,18,11,1));
+box-shadow:0 0 24px rgba(212,176,88,0.15),inset 0 1px 0 rgba(255,221,144,0.1);
+position:relative;overflow:hidden;}
+.result-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+background:linear-gradient(90deg,transparent,#d4b058,transparent);animation:scanLine 3s linear infinite;}
+@keyframes scanLine{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+.result-area{display:flex;gap:10px;}
 .res-block{flex:1;text-align:center;}
-.res-tip{font-size:11px;color:#b8a678;}
-.res-num{margin-top:3px;font-size:18px;color:#ffd770;font-weight:bold;}
-.res-block.total .res-num{color:#6ee07a;}
-.res-divider{width:1px;background:#4a3d1e;}
-.range-row{margin-top:10px;display:flex;gap:6px;}
-.range-item{flex:1;background:#17150e;border:1px solid #645126;padding:6px 4px;border-radius:5px;text-align:center;}
+.res-tip{font-size:11px;color:#b8a678;margin-bottom:2px;}
+.res-num{margin-top:4px;font-size:20px;color:#ffd770;font-weight:bold;
+text-shadow:0 0 12px rgba(255,215,112,0.4);font-family:'Courier New',monospace;}
+.res-block.total .res-num{color:#6ee07a;text-shadow:0 0 12px rgba(110,224,122,0.4);}
+.res-divider{width:1px;background:linear-gradient(180deg,transparent,#4a3d1e,transparent);}
+.range-row{margin-top:12px;display:flex;gap:6px;}
+.range-item{flex:1;background:linear-gradient(145deg,rgba(23,21,14,0.9),rgba(18,16,10,0.95));
+border:1px solid rgba(100,81,38,0.4);padding:7px 4px;border-radius:6px;text-align:center;transition:all 0.2s;}
+.range-item:hover{transform:translateY(-1px);}
 .range-item .rt{font-size:9px;color:#b8a678;}
-.range-item .rv{font-size:12px;color:#ffd770;margin-top:2px;font-weight:bold;}
-.range-item.mid{border-color:#d4b058;}
+.range-item .rv{font-size:13px;color:#ffd770;margin-top:3px;font-weight:bold;font-family:'Courier New',monospace;}
+.range-item.mid{border-color:#d4b058;box-shadow:0 0 10px rgba(212,176,88,0.15);}
 .range-item.low .rv{color:#6ee07a;}
 .range-item.high .rv{color:#e88484;}
-.confidence-row{margin-top:8px;padding:6px 10px;background:#17150e;border:1px solid #645126;border-radius:6px;}
-.confidence-label{display:flex;justify-content:space-between;font-size:10px;color:#b8a678;margin-bottom:4px;}
-.confidence-val{color:#6ee07a;font-weight:bold;}
-.confidence-bar{height:4px;background:#0e0d08;border-radius:2px;overflow:hidden;}
-.confidence-fill{height:100%;width:90%;background:linear-gradient(90deg,#4fc464,#6ee07a);border-radius:2px;}
-.reset-btn{width:100%;margin-top:8px;padding:6px;background:#2a2518;border:1px solid #635024;color:#8a7d5a;font-size:11px;border-radius:6px;cursor:pointer;}
-.reset-btn:hover{border-color:#8b7034;color:#d4b058;}
-.user-bar{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#6b6142;margin-bottom:8px;padding:0 2px;}
-.user-bar .expire{color:#84b8e8;}
-.user-bar .logout-link{color:#8a7d5a;cursor:pointer;text-decoration:underline;}
+.confidence-row{margin-top:10px;padding:8px 10px;background:linear-gradient(135deg,rgba(23,21,14,0.9),rgba(18,16,10,0.95));
+border:1px solid rgba(100,81,38,0.4);border-radius:7px;}
+.confidence-label{display:flex;justify-content:space-between;font-size:10px;color:#b8a678;margin-bottom:5px;}
+.confidence-val{color:#6ee07a;font-weight:bold;text-shadow:0 0 6px rgba(110,224,122,0.3);}
+.confidence-bar{height:5px;background:#0e0d08;border-radius:3px;overflow:hidden;}
+.confidence-fill{height:100%;width:90%;background:linear-gradient(90deg,#4fc464,#6ee07a);border-radius:3px;
+box-shadow:0 0 8px rgba(110,224,122,0.4);transition:width 0.5s ease;}
+.reset-btn{width:100%;margin-top:10px;padding:8px;background:linear-gradient(180deg,#2a2518,#1e1b12);
+border:1px solid #635024;color:#8a7d5a;font-size:11px;border-radius:7px;cursor:pointer;transition:all 0.25s;letter-spacing:2px;}
+.reset-btn:hover{border-color:#8b7034;color:#d4b058;background:linear-gradient(180deg,#332d1d,#252216);}
+.user-bar{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#6b6142;margin-bottom:10px;padding:0 2px;}
+.user-bar .expire{color:#84b8e8;text-shadow:0 0 6px rgba(132,184,232,0.3);}
+.user-bar .logout-link{color:#8a7d5a;cursor:pointer;text-decoration:underline;transition:color 0.2s;}
 .user-bar .logout-link:hover{color:#e88484;}
+
+/* ===== 激活成功遮罩 ===== */
+#successOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:998;display:none;
+background:radial-gradient(circle at center,rgba(212,176,88,0.15),transparent 70%);
+align-items:center;justify-content:center;pointer-events:none;}
+.success-text{font-size:32px;font-weight:bold;color:#ffdd90;letter-spacing:8px;
+text-shadow:0 0 30px rgba(255,221,144,0.8),0 0 60px rgba(212,176,88,0.5);
+animation:successPop 0.8s cubic-bezier(0.16,1,0.3,1);}
+@keyframes successPop{0%{opacity:0;transform:scale(0.5);}50%{transform:scale(1.1);}100%{opacity:1;transform:scale(1);}}
 </style>
 </head>
 <body>
+
+<canvas id="particleCanvas"></canvas>
+<canvas id="burstCanvas"></canvas>
+
+<div id="successOverlay"><div class="success-text">激活成功</div></div>
 
 <div id="authMask">
     <div class="auth-box">
@@ -87,7 +179,7 @@ body{background-color:#1c1a11;min-height:100vh;padding:10px 8px;}
         <input type="text" class="auth-input" id="authInput" placeholder="请输入密钥" maxlength="32">
         <button class="auth-btn" id="authBtn" onclick="doActivate()">激 活</button>
         <div class="auth-err" id="authErr"></div>
-        <div class="auth-qq">获取密钥请联系 QQ：3676023445</div>
+        <div class="auth-qq">获取密钥请联系 <span>QQ：3676023445</span></div>
     </div>
 </div>
 
@@ -156,14 +248,13 @@ body{background-color:#1c1a11;min-height:100vh;padding:10px 8px;}
         <button class="reset-btn" onclick="resetAll()">重置数据</button>
     </div>
     <div id="mapMode" style="display:none;">
-        <div class="role-tip" style="text-align:center;padding:20px 0;color:#8a7d5a;">地图测算模式开发中...</div>
+        <div class="role-tip" style="text-align:center;padding:30px 0;color:#8a7d5a;">地图测算模式开发中...</div>
     </div>
 </div>
 
 <script>
 // ============================================================
-//  卡密数据区（用SHA256哈希存储，不明文）
-//  生成新卡密请打开 admin.html 生成，然后把哈希粘贴到下面
+//  卡密数据区
 // ============================================================
 const KEY_DATA = [
     { h: "52f53545d8f9b709d56649a3f1711d02c9def1a9e29f8d9d36fa189c83ecd97f", t: "days", d: 1, n: "" },
@@ -268,7 +359,7 @@ const KEY_DATA = [
     { h: "8d27d76e851d0e03139e034e48233f2928049f0a01be654b1cdf5c20616c0ebc", t: "days", d: 1, n: "" }
 ];
 
-// ===== SHA256哈希（浏览器原生） =====
+// ===== SHA256 =====
 async function sha256(text) {
     const enc = new TextEncoder();
     const buf = await crypto.subtle.digest('SHA-256', enc.encode(text.trim().toUpperCase()));
@@ -288,6 +379,110 @@ function getDeviceId() {
 }
 const deviceId = getDeviceId();
 
+// ===== 粒子背景 =====
+const pCanvas = document.getElementById('particleCanvas');
+const pCtx = pCanvas.getContext('2d');
+let particles = [];
+function resizeCanvas() { pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+for (let i = 0; i < 60; i++) {
+    particles.push({
+        x: Math.random() * pCanvas.width,
+        y: Math.random() * pCanvas.height,
+        r: Math.random() * 2 + 0.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.5 + 0.2
+    });
+}
+function drawParticles() {
+    pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+    particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = pCanvas.width;
+        if (p.x > pCanvas.width) p.x = 0;
+        if (p.y < 0) p.y = pCanvas.height;
+        if (p.y > pCanvas.height) p.y = 0;
+        pCtx.beginPath();
+        pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        pCtx.fillStyle = `rgba(212,176,88,${p.alpha})`;
+        pCtx.fill();
+        pCtx.shadowBlur = 8;
+        pCtx.shadowColor = 'rgba(212,176,88,0.5)';
+    });
+    // 连线
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 120) {
+                pCtx.beginPath();
+                pCtx.moveTo(particles[i].x, particles[i].y);
+                pCtx.lineTo(particles[j].x, particles[j].y);
+                pCtx.strokeStyle = `rgba(212,176,88,${0.15 * (1 - dist/120)})`;
+                pCtx.lineWidth = 0.5;
+                pCtx.stroke();
+            }
+        }
+    }
+    pCtx.shadowBlur = 0;
+    requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ===== 激活爆发特效 =====
+const bCanvas = document.getElementById('burstCanvas');
+const bCtx = bCanvas.getContext('2d');
+let burstParticles = [];
+function resizeBurst() { bCanvas.width = window.innerWidth; bCanvas.height = window.innerHeight; }
+resizeBurst();
+window.addEventListener('resize', resizeBurst);
+
+function triggerBurst() {
+    bCanvas.style.display = 'block';
+    const cx = bCanvas.width / 2, cy = bCanvas.height / 2;
+    for (let i = 0; i < 120; i++) {
+        const angle = (Math.PI * 2 * i) / 120 + Math.random() * 0.3;
+        const speed = Math.random() * 8 + 3;
+        burstParticles.push({
+            x: cx, y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            r: Math.random() * 4 + 1,
+            life: 1,
+            decay: Math.random() * 0.015 + 0.008,
+            color: Math.random() > 0.5 ? '255,221,144' : '212,176,88'
+        });
+    }
+    animateBurst();
+}
+function animateBurst() {
+    bCtx.fillStyle = 'rgba(13,12,8,0.15)';
+    bCtx.fillRect(0, 0, bCanvas.width, bCanvas.height);
+    burstParticles = burstParticles.filter(p => p.life > 0);
+    burstParticles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.08;
+        p.vx *= 0.99;
+        p.life -= p.decay;
+        bCtx.beginPath();
+        bCtx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+        bCtx.fillStyle = `rgba(${p.color},${p.life})`;
+        bCtx.shadowBlur = 15;
+        bCtx.shadowColor = `rgba(${p.color},${p.life})`;
+        bCtx.fill();
+    });
+    bCtx.shadowBlur = 0;
+    if (burstParticles.length > 0) {
+        requestAnimationFrame(animateBurst);
+    } else {
+        bCtx.clearRect(0, 0, bCanvas.width, bCanvas.height);
+        bCanvas.style.display = 'none';
+    }
+}
+
 // ===== 卡密验证 =====
 async function doActivate() {
     const key = document.getElementById('authInput').value.trim();
@@ -299,14 +494,11 @@ async function doActivate() {
     try {
         const hash = await sha256(key);
         const record = KEY_DATA.find(k => k.h === hash);
-
         if (!record) {
             err.innerText = '卡密不存在，请联系QQ：3676023445';
             btn.disabled = false; btn.innerText = '激 活';
             return;
         }
-
-        // 检查本地是否已激活（伪设备绑定）
         const saved = localStorage.getItem('_cd_act');
         if (saved) {
             const act = JSON.parse(saved);
@@ -316,19 +508,9 @@ async function doActivate() {
                 return;
             }
         }
-
-        // 首次激活，记录到本地
         const now = Date.now();
-        const actData = {
-            h: hash,
-            dev: deviceId,
-            at: now,
-            t: record.t,
-            d: record.d || 0
-        };
+        const actData = { h: hash, dev: deviceId, at: now, t: record.t, d: record.d || 0 };
         localStorage.setItem('_cd_act', JSON.stringify(actData));
-
-        // 计算到期时间
         let expireAt = null;
         if (record.t === 'days' && record.d > 0) {
             expireAt = new Date(now + record.d * 86400000).toISOString();
@@ -337,7 +519,16 @@ async function doActivate() {
             localStorage.setItem('_cd_exp', 'perm');
         }
 
-        showApp({ expireAt });
+        // 激活特效
+        triggerBurst();
+        document.getElementById('successOverlay').style.display = 'flex';
+
+        setTimeout(() => {
+            document.getElementById('successOverlay').style.display = 'none';
+            document.getElementById('authMask').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            showApp({ expireAt });
+        }, 1200);
     } catch (e) {
         err.innerText = '验证出错，请重试';
         btn.disabled = false; btn.innerText = '激 活';
@@ -345,8 +536,6 @@ async function doActivate() {
 }
 
 function showApp(data) {
-    document.getElementById('authMask').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
     if (data.expireAt) {
         const d = new Date(data.expireAt);
         document.getElementById('expireInfo').innerText = '到期：' + d.toLocaleDateString('zh-CN');
@@ -368,13 +557,12 @@ function logoutAuth() {
 
 document.getElementById('authInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') doActivate(); });
 
-// 自动验证（之前激活过的）
+// 自动验证
 (function autoVerify() {
     const act = localStorage.getItem('_cd_act');
     if (!act) return;
     try {
         const data = JSON.parse(act);
-        // 检查过期
         if (data.t === 'days' && data.d > 0) {
             const expireTime = data.at + data.d * 86400000;
             if (Date.now() > expireTime) {
@@ -383,8 +571,12 @@ document.getElementById('authInput').addEventListener('keydown', function(e) { i
                 document.getElementById('authErr').innerText = '卡密已过期，请联系QQ：3676023445续费';
                 return;
             }
+            document.getElementById('authMask').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
             showApp({ expireAt: new Date(expireTime).toISOString() });
         } else {
+            document.getElementById('authMask').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
             showApp({ expireAt: null });
         }
     } catch (e) {
