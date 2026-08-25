@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡密管理后台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft YaHei",sans-serif;}
+body{background:#1c1a11;min-height:100vh;padding:20px;color:#d8c8a0;}
+.container{max-width:900px;margin:0 auto;}
+h1{color:#e6c264;text-align:center;margin-bottom:20px;font-size:22px;}
+
+/* 登录 */
+.login-box{
+    max-width:360px;margin:60px auto;
+    background:#272418;border:1px solid #8b7034;
+    border-radius:10px;padding:30px;
+}
+.login-box h2{color:#e6c264;text-align:center;margin-bottom:20px;font-size:18px;}
+.login-box input{
+    width:100%;padding:10px 12px;margin-bottom:12px;
+    background:#14130d;border:1px solid #635024;border-radius:6px;
+    color:#f0e8cc;font-size:14px;outline:none;
+}
+.login-box input:focus{border-color:#d4b058;}
+.btn{
+    padding:8px 18px;border-radius:6px;cursor:pointer;
+    font-size:13px;border:1px solid #635024;transition:all .2s;
+}
+.btn-primary{
+    width:100%;padding:10px;
+    background:linear-gradient(180deg,#6b5424,#5c4920);
+    border-color:#b89242;color:#ffdd90;font-size:14px;
+}
+.btn-primary:hover{background:linear-gradient(180deg,#7d6328,#6b5424);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-ban{background:#3a1f1f;border-color:#8b3a3a;color:#e88484;}
+.btn-ban:hover{background:#4a2828;}
+.btn-unban{background:#1f3a1f;border-color:#3a8b3a;color:#84e884;}
+.btn-unban:hover{background:#284a28;}
+.btn-del{background:#2a2518;border-color:#635024;color:#8a7d5a;}
+.btn-del:hover{border-color:#8b3a3a;color:#e88484;}
+.btn-gen{background:#1f3a2a;border-color:#3a8b5a;color:#84e8a8;}
+.btn-gen:hover{background:#284a35;}
+
+/* 统计卡片 */
+.stats{display:flex;gap:10px;margin-bottom:20px;}
+.stat-card{
+    flex:1;background:#272418;border:1px solid #645126;
+    border-radius:8px;padding:14px;text-align:center;
+}
+.stat-card .num{font-size:24px;font-weight:bold;color:#ffd770;}
+.stat-card .label{font-size:12px;color:#8a7d5a;margin-top:4px;}
+.stat-card.unused .num{color:#6ee07a;}
+.stat-card.active .num{color:#4488dd;}
+.stat-card.banned .num{color:#e88484;}
+
+/* 操作栏 */
+.toolbar{
+    background:#272418;border:1px solid #645126;border-radius:8px;
+    padding:14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;
+}
+.toolbar .field{display:flex;flex-direction:column;gap:4px;}
+.toolbar label{font-size:11px;color:#8a7d5a;}
+.toolbar input,.toolbar select{
+    padding:7px 10px;background:#14130d;border:1px solid #635024;
+    border-radius:5px;color:#f0e8cc;font-size:13px;outline:none;
+}
+.toolbar input:focus,.toolbar select:focus{border-color:#d4b058;}
+
+/* 表格 */
+.table-wrap{
+    background:#272418;border:1px solid #645126;border-radius:8px;
+    overflow:hidden;
+}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{
+    background:#1e1b12;color:#b8a678;padding:10px 8px;
+    text-align:left;font-weight:normal;font-size:12px;
+    border-bottom:1px solid #4a3d1e;
+}
+td{padding:8px;border-bottom:1px solid #2a2518;color:#d8c8a0;}
+tr:hover td{background:rgba(212,176,88,0.03);}
+.status-tag{
+    display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;
+}
+.status-unused{background:#1f3a1f;color:#84e8a8;}
+.status-active{background:#1f2a3a;color:#84b8e8;}
+.status-banned{background:#3a1f1f;color:#e88484;}
+.key-text{font-family:monospace;color:#ffd770;letter-spacing:1px;}
+.actions{display:flex;gap:5px;}
+
+/* 弹窗 */
+.modal-mask{
+    display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;
+}
+.modal{
+    background:#272418;border:1px solid #8b7034;border-radius:10px;
+    padding:20px;max-width:500px;width:90%;max-height:70vh;display:flex;flex-direction:column;
+}
+.modal h3{color:#e6c264;margin-bottom:14px;font-size:16px;}
+.modal textarea{
+    flex:1;width:100%;min-height:200px;padding:10px;
+    background:#14130d;border:1px solid #635024;border-radius:6px;
+    color:#6ee07a;font-family:monospace;font-size:13px;
+    resize:none;outline:none;
+}
+.modal .modal-actions{margin-top:12px;display:flex;gap:8px;justify-content:flex-end;}
+.btn-copy{background:#1f3a2a;border-color:#3a8b5a;color:#84e8a8;}
+.btn-close{background:#2a2518;border-color:#635024;color:#b8a678;}
+.err-msg{color:#e88484;font-size:12px;margin-top:8px;min-height:16px;}
+.logout-btn{
+    position:absolute;top:20px;right:20px;
+    background:#2a2518;border:1px solid #635024;color:#8a7d5a;
+    padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;
+}
+.logout-btn:hover{color:#e88484;border-color:#8b3a3a;}
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div id="loginPage" class="login-box">
+    <h2>卡密管理后台</h2>
+    <input type="password" id="loginPass" placeholder="请输入管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-primary" onclick="doLogin()">登 录</button>
+    <div class="err-msg" id="loginErr"></div>
+</div>
+
+<!-- 管理面板 -->
+<div id="adminPanel" style="display:none;position:relative;">
+    <button class="logout-btn" onclick="logout()">退出登录</button>
+    <h1>卡密管理后台</h1>
+
+    <div class="stats">
+        <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">总卡密</div></div>
+        <div class="stat-card unused"><div class="num" id="statUnused">0</div><div class="label">未使用</div></div>
+        <div class="stat-card active"><div class="num" id="statActive">0</div><div class="label">已激活</div></div>
+        <div class="stat-card banned"><div class="num" id="statBanned">0</div><div class="label">已封禁</div></div>
+    </div>
+
+    <div class="toolbar">
+        <div class="field">
+            <label>生成数量</label>
+            <input type="number" id="genCount" value="10" min="1" max="100" style="width:80px;">
+        </div>
+        <div class="field">
+            <label>有效天数（0=永久）</label>
+            <input type="number" id="genDays" value="0" min="0" style="width:100px;">
+        </div>
+        <div class="field">
+            <label>备注</label>
+            <input type="text" id="genNote" placeholder="选填" style="width:120px;">
+        </div>
+        <button class="btn btn-gen" onclick="generateKeys()">批量生成</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>卡密</th>
+                    <th>状态</th>
+                    <th>有效期</th>
+                    <th>创建时间</th>
+                    <th>备注</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="keyTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 生成结果弹窗 -->
+<div class="modal-mask" id="resultModal">
+    <div class="modal">
+        <h3>生成成功，请复制保存</h3>
+        <textarea id="resultText" readonly></textarea>
+        <div class="modal-actions">
+            <button class="btn btn-copy" onclick="copyResult()">复制全部</button>
+            <button class="btn btn-close" onclick="closeModal()">关闭</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let token = localStorage.getItem('admin_token') || '';
+
+async function api(url, method='GET', body=null) {
+    const opts = {
+        method,
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    return res.json();
+}
+
+async function doLogin() {
+    const pass = document.getElementById('loginPass').value;
+    if (!pass) return;
+    const res = await api('/api/admin/login', 'POST', { password: pass });
+    if (res.success) {
+        token = res.token;
+        localStorage.setItem('admin_token', token);
+        showPanel();
+    } else {
+        document.getElementById('loginErr').innerText = res.message;
+    }
+}
+
+function logout() {
+    token = '';
+    localStorage.removeItem('admin_token');
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'block';
+}
+
+async function showPanel() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    await loadStats();
+    await loadKeys();
+}
+
+async function loadStats() {
+    const res = await api('/api/admin/stats');
+    if (res.success) {
+        document.getElementById('statTotal').innerText = res.stats.total;
+        document.getElementById('statUnused').innerText = res.stats.unused;
+        document.getElementById('statActive').innerText = res.stats.active;
+        document.getElementById('statBanned').innerText = res.stats.banned;
+    }
+}
+
+async function loadKeys() {
+    const res = await api('/api/admin/keys');
+    if (!res.success) {
+        if (res.message.includes('未授权')) logout();
+        return;
+    }
+    const tbody = document.getElementById('keyTable');
+    tbody.innerHTML = '';
+    res.keys.reverse().forEach(k => {
+        const tr = document.createElement('tr');
+        const statusClass = k.status === 'unused' ? 'status-unused' : k.status === 'active' ? 'status-active' : 'status-banned';
+        const statusText = k.status === 'unused' ? '未使用' : k.status === 'active' ? '已激活' : '已封禁';
+        const expireText = k.expireDays === 0 ? '永久' : (k.expireDays + '天');
+        const created = k.createdAt ? new Date(k.createdAt).toLocaleString('zh-CN') : '-';
+        tr.innerHTML = `
+            <td><span class="key-text">${k.key}</span></td>
+            <td><span class="status-tag ${statusClass}">${statusText}</span></td>
+            <td>${expireText}</td>
+            <td>${created}</td>
+            <td>${k.note || '-'}</td>
+            <td class="actions">
+                <button class="btn btn-sm ${k.status==='banned'?'btn-unban':'btn-ban'}" onclick="toggleBan('${k.key}')">${k.status==='banned'?'解封':'封禁'}</button>
+                <button class="btn btn-sm btn-del" onclick="deleteKey('${k.key}')">删除</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function generateKeys() {
+    const count = document.getElementById('genCount').value;
+    const expireDays = document.getElementById('genDays').value;
+    const note = document.getElementById('genNote').value;
+    const res = await api('/api/admin/generate', 'POST', { count, expireDays, note });
+    if (res.success) {
+        const text = res.keys.map(k => k.key).join('\n');
+        document.getElementById('resultText').value = text;
+        document.getElementById('resultModal').style.display = 'flex';
+        await loadStats();
+        await loadKeys();
+    } else {
+        alert(res.message);
+    }
+}
+
+async function toggleBan(key) {
+    const res = await api('/api/admin/toggle-ban', 'POST', { key });
+    if (res.success) {
+        await loadStats();
+        await loadKeys();
+    }
+}
+
+async function deleteKey(key) {
+    if (!confirm('确定删除卡密 ' + key + ' ？')) return;
+    const res = await api('/api/admin/delete', 'POST', { key });
+    if (res.success) {
+        await loadStats();
+        await loadKeys();
+    }
+}
+
+function copyResult() {
+    const ta = document.getElementById('resultText');
+    ta.select();
+    document.execCommand('copy');
+    alert('已复制到剪贴板');
+}
+
+function closeModal() {
+    document.getElementById('resultModal').style.display = 'none';
+}
+
+// 自动登录
+if (token) {
+    (async () => {
+        const res = await api('/api/admin/stats');
+        if (res.success) showPanel();
+        else logout();
+    })();
+}
+</script>
+</body>
+</html>

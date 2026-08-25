@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俱乐部大玩家 · 价值计算器</title>
+<style>
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Microsoft YaHei", "SimHei", sans-serif;
+}
+body{
+    background-color:#1c1a11;
+    min-height:100vh;
+    padding:10px 8px;
+}
+
+/* ===== 密钥验证遮罩 ===== */
+#authMask{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:#1c1a11;
+    z-index:999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+.auth-box{
+    width:100%;
+    max-width:320px;
+    background:#272418;
+    border:1px solid #8b7034;
+    border-radius:10px;
+    padding:24px 18px;
+    text-align:center;
+}
+.auth-icon{font-size:36px;margin-bottom:10px;}
+.auth-title{color:#e6c264;font-size:16px;font-weight:bold;margin-bottom:6px;}
+.auth-sub{color:#8a7d5a;font-size:11px;margin-bottom:18px;}
+.auth-input{
+    width:100%;
+    background:#14130d;
+    border:1px solid #635024;
+    color:#f0e8cc;
+    padding:10px 12px;
+    font-size:14px;
+    border-radius:6px;
+    outline:none;
+    text-align:center;
+    letter-spacing:2px;
+    margin-bottom:10px;
+}
+.auth-input:focus{border-color:#d4b058;}
+.auth-btn{
+    width:100%;
+    padding:10px;
+    background:linear-gradient(180deg,#6b5424,#5c4920);
+    border:1px solid #b89242;
+    color:#ffdd90;
+    font-size:14px;
+    border-radius:6px;
+    cursor:pointer;
+}
+.auth-btn:hover{background:linear-gradient(180deg,#7d6328,#6b5424);}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.auth-err{color:#e88484;font-size:11px;margin-top:10px;min-height:16px;}
+.auth-qq{margin-top:16px;color:#6b6142;font-size:10px;}
+
+/* ===== 主界面 ===== */
+.main-box{
+    max-width:380px;
+    margin:0 auto;
+    background:#272418;
+    border:1px solid #8b7034;
+    border-radius:10px;
+    padding:14px;
+}
+.top-title{
+    text-align:center;
+    color:#e6c264;
+    font-size:16px;
+    font-weight:bold;
+    margin-bottom:4px;
+    letter-spacing:1px;
+}
+.top-sub{
+    text-align:center;
+    color:#8a7d5a;
+    font-size:10px;
+    margin-bottom:10px;
+}
+.author-line{
+    text-align:center;
+    color:#6b6142;
+    font-size:10px;
+    margin-bottom:10px;
+}
+.notice-bar{
+    background:#2a1f12;
+    border:1px solid #6b4a1e;
+    border-radius:6px;
+    padding:7px 10px;
+    margin-bottom:10px;
+    color:#d4a04a;
+    font-size:10px;
+    line-height:1.5;
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+}
+.notice-icon{color:#e8a838;font-size:11px;flex-shrink:0;}
+.tab-wrap{
+    display:flex;
+    gap:4px;
+    margin-bottom:10px;
+}
+.tab-item{
+    flex:1;
+    text-align:center;
+    padding:6px 2px;
+    border:1px solid #635024;
+    border-radius:6px;
+    color:#b8a678;
+    font-size:12px;
+    cursor:pointer;
+    background:#1e1b12;
+}
+.tab-item.active{
+    background:#705928;
+    border-color:#d4b058;
+    color:#ffdd90;
+}
+.role-card{
+    background:#1e1b12;
+    border:1px solid #645126;
+    border-radius:8px;
+    padding:10px;
+    margin-bottom:10px;
+}
+.role-header{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:5px;
+}
+.role-avatar{
+    width:28px;
+    height:28px;
+    border-radius:6px;
+    background:linear-gradient(135deg,#3a6db5,#2a5494);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:bold;
+}
+.role-name{color:#e6c264;font-size:13px;font-weight:bold;}
+.role-badge{
+    display:inline-block;
+    background:#3a6db5;
+    color:#fff;
+    font-size:9px;
+    padding:1px 5px;
+    border-radius:3px;
+    margin-left:4px;
+}
+.role-tip{color:#9a8d68;font-size:10px;line-height:1.6;}
+.role-tip .highlight{color:#d4a843;}
+.mode-wrap{
+    display:flex;
+    gap:4px;
+    margin-bottom:12px;
+}
+.mode-item{
+    flex:1;
+    text-align:center;
+    padding:7px 2px;
+    border:1px solid #635024;
+    border-radius:6px;
+    color:#b8a678;
+    font-size:11px;
+    cursor:pointer;
+    background:#1e1b12;
+}
+.mode-item.active{
+    background:#5c4920;
+    border-color:#d4b058;
+    color:#ffdd90;
+}
+.item-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:8px;
+    padding:4px 6px;
+    border-radius:6px;
+}
+.dot-wrap{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.color-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+}
+.dot-green{background:#4fc464;}
+.dot-blue{background:#4488dd;}
+.dot-purple{background:#aa62cc;}
+.dot-orange{background:#f09633;}
+.dot-red{background:#e24848;}
+.dot-car{background:#c8c8c8;}
+.txt-label{color:#d8c8a0;font-size:13px;}
+.item-row input{
+    width:62px;
+    background:#14130d;
+    border:1px solid #635024;
+    color:#f0e8cc;
+    padding:5px 6px;
+    font-size:13px;
+    border-radius:5px;
+    outline: none;
+    text-align:center;
+}
+.item-row input:focus{border-color:#d4b058;}
+.divider{
+    border:none;
+    border-top:1px solid #4a3d1e;
+    margin:8px 0;
+}
+.discount-row{
+    margin:10px 0;
+    padding:8px 10px;
+    background:#17150e;
+    border:1px solid #645126;
+    border-radius:6px;
+}
+.discount-label{
+    display:flex;
+    justify-content:space-between;
+    color:#b8a678;
+    font-size:11px;
+    margin-bottom:5px;
+}
+.discount-val{color:#ffd770;font-weight:bold;}
+.discount-row input[type=range]{
+    width:100%;
+    accent-color:#d4b058;
+    height:4px;
+}
+.result-box{
+    margin-top:12px;
+    border:2px solid #d4b058;
+    border-radius:8px;
+    padding:10px 12px;
+    background:#1a170e;
+}
+.result-area{
+    display:flex;
+    gap:8px;
+}
+.res-block{flex:1;text-align:center;}
+.res-tip{font-size:11px;color:#b8a678;}
+.res-num{
+    margin-top:3px;
+    font-size:18px;
+    color:#ffd770;
+    font-weight:bold;
+}
+.res-block.total .res-num{color:#6ee07a;}
+.res-divider{width:1px;background:#4a3d1e;}
+.range-row{
+    margin-top:10px;
+    display:flex;
+    gap:6px;
+}
+.range-item{
+    flex:1;
+    background:#17150e;
+    border:1px solid #645126;
+    padding:6px 4px;
+    border-radius:5px;
+    text-align:center;
+}
+.range-item .rt{font-size:9px;color:#b8a678;}
+.range-item .rv{
+    font-size:12px;
+    color:#ffd770;
+    margin-top:2px;
+    font-weight:bold;
+}
+.range-item.mid{border-color:#d4b058;}
+.range-item.low .rv{color:#6ee07a;}
+.range-item.high .rv{color:#e88484;}
+.confidence-row{
+    margin-top:8px;
+    padding:6px 10px;
+    background:#17150e;
+    border:1px solid #645126;
+    border-radius:6px;
+}
+.confidence-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:10px;
+    color:#b8a678;
+    margin-bottom:4px;
+}
+.confidence-val{color:#6ee07a;font-weight:bold;}
+.confidence-bar{
+    height:4px;
+    background:#0e0d08;
+    border-radius:2px;
+    overflow:hidden;
+}
+.confidence-fill{
+    height:100%;
+    width:90%;
+    background:linear-gradient(90deg,#4fc464,#6ee07a);
+    border-radius:2px;
+}
+.reset-btn{
+    width:100%;
+    margin-top:8px;
+    padding:6px;
+    background:#2a2518;
+    border:1px solid #635024;
+    color:#8a7d5a;
+    font-size:11px;
+    border-radius:6px;
+    cursor:pointer;
+}
+.reset-btn:hover{border-color:#8b7034;color:#d4b058;}
+
+/* 顶部用户信息 */
+.user-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:10px;
+    color:#6b6142;
+    margin-bottom:8px;
+    padding:0 2px;
+}
+.user-bar .expire{color:#84b8e8;}
+.user-bar .logout-link{color:#8a7d5a;cursor:pointer;text-decoration:underline;}
+.user-bar .logout-link:hover{color:#e88484;}
+</style>
+</head>
+<body>
+
+<!-- 密钥验证 -->
+<div id="authMask">
+    <div class="auth-box">
+        <div class="auth-icon">🔐</div>
+        <div class="auth-title">俱乐部大玩家</div>
+        <div class="auth-sub">请输入激活密钥以使用</div>
+        <input type="text" class="auth-input" id="authInput" placeholder="请输入密钥" maxlength="32">
+        <button class="auth-btn" id="authBtn" onclick="doActivate()">激 活</button>
+        <div class="auth-err" id="authErr"></div>
+        <div class="auth-qq">获取密钥请联系 QQ：3676023445</div>
+    </div>
+</div>
+
+<!-- 主界面 -->
+<div class="main-box" id="mainApp" style="display:none;">
+    <div class="user-bar">
+        <span>已授权</span>
+        <span class="expire" id="expireInfo"></span>
+        <span class="logout-link" onclick="logoutAuth()">退出</span>
+    </div>
+
+    <div class="top-title">俱乐部大玩家 · 价值计算器</div>
+    <div class="top-sub">角色估值 / 地图切换 / 均格反查</div>
+    <div class="author-line">作者 QQ：3676023445　|　∞ 永久</div>
+
+    <div class="notice-bar">
+        <span class="notice-icon">⚠</span>
+        <span>巡回模式估价仅供参考，看到50万以上的货直接梭哈，全程不使用道具。</span>
+    </div>
+
+    <div class="tab-wrap">
+        <div class="tab-item" onclick="switchMap('xunhui')">巡回</div>
+        <div class="tab-item active" onclick="switchMap('yanjing')">燕京</div>
+        <div class="tab-item" onclick="switchMap('xiangjiang')">香江</div>
+        <div class="tab-item" onclick="switchMap('nicheng')">霓城</div>
+        <div class="tab-item" onclick="switchMap('dubai')">迪拜</div>
+    </div>
+
+    <div class="role-card">
+        <div class="role-header">
+            <div class="role-avatar">霍</div>
+            <div class="role-name">霍姑姑<span class="role-badge">加权精准</span></div>
+        </div>
+        <div class="role-tip">
+            推荐道具：<span class="highlight">红格怀表，巨物价值，四件放大镜，奢侈扫描仪，全放大镜</span><br>
+            红格过多建议用奢侈扫描仪确认是否有车身，有则填入车身池。
+        </div>
+    </div>
+
+    <div class="mode-wrap">
+        <div class="mode-item active" onclick="switchMode('classic')">经典估值</div>
+        <div class="mode-item" onclick="switchMode('map')">地图测算</div>
+    </div>
+
+    <div id="classicMode">
+        <div class="item-row">
+            <div class="dot-wrap">
+                <span class="color-dot dot-green"></span>
+                <span class="txt-label">绿色（格数）</span>
+            </div>
+            <input type="number" id="green" value="" placeholder="0" oninput="calc()">
+        </div>
+        <div class="item-row">
+            <div class="dot-wrap">
+                <span class="color-dot dot-blue"></span>
+                <span class="txt-label">蓝色（格数）</span>
+            </div>
+            <input type="number" id="blue" value="" placeholder="0" oninput="calc()">
+        </div>
+        <div class="item-row">
+            <div class="dot-wrap">
+                <span class="color-dot dot-purple"></span>
+                <span class="txt-label">紫色（格数）</span>
+            </div>
+            <input type="number" id="purple" value="" placeholder="0" oninput="calc()">
+        </div>
+        <div class="item-row">
+            <div class="dot-wrap">
+                <span class="color-dot dot-orange"></span>
+                <span class="txt-label">橙色（格数）</span>
+            </div>
+            <input type="number" id="orange" value="" placeholder="0" oninput="calc()">
+        </div>
+        <div class="item-row">
+            <div class="dot-wrap">
+                <span class="color-dot dot-red"></span>
+                <span class="txt-label">红色（格数）</span>
+            </div>
+            <input type="number" id="red" value="" placeholder="0" oninput="calc()">
+        </div>
+
+        <hr class="divider">
+
+        <div class="item-row">
+            <div class="dot-wrap">
+                <span class="color-dot dot-car"></span>
+                <span class="txt-label">车身零件价值</span>
+            </div>
+            <input type="number" id="carPart" value="" placeholder="没出留空" oninput="calc()">
+        </div>
+
+        <div class="discount-row">
+            <div class="discount-label">
+                <span>出价折扣系数</span>
+                <span class="discount-val" id="discountText">0.85</span>
+            </div>
+            <input type="range" id="discountRange" min="0.5" max="1.0" step="0.01" value="0.85" oninput="updateDiscount()">
+        </div>
+
+        <div class="result-box">
+            <div class="result-area">
+                <div class="res-block bid">
+                    <div class="res-tip">推荐出价</div>
+                    <div class="res-num" id="bidVal">0</div>
+                </div>
+                <div class="res-divider"></div>
+                <div class="res-block total">
+                    <div class="res-tip">预估仓位价值</div>
+                    <div class="res-num" id="totalVal">0</div>
+                </div>
+            </div>
+            <div class="range-row">
+                <div class="range-item low">
+                    <div class="rt">保守 0.75</div>
+                    <div class="rv" id="lowBid">0</div>
+                </div>
+                <div class="range-item mid">
+                    <div class="rt">当前</div>
+                    <div class="rv" id="midBid">0</div>
+                </div>
+                <div class="range-item high">
+                    <div class="rt">激进 0.95</div>
+                    <div class="rv" id="highBid">0</div>
+                </div>
+            </div>
+            <div class="confidence-row">
+                <div class="confidence-label">
+                    <span>置信度</span>
+                    <span class="confidence-val" id="confText">90%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="reset-btn" onclick="resetAll()">重置数据</button>
+    </div>
+
+    <div id="mapMode" style="display:none;">
+        <div class="role-tip" style="text-align:center;padding:20px 0;color:#8a7d5a;">
+            地图测算模式开发中...
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== 配置：部署后改成你的服务器地址 =====
+// 本地测试用 http://localhost:3000
+// 部署到服务器后改成 https://你的域名
+const API_BASE = window.location.origin;
+
+// ===== 设备指纹生成 =====
+function getDeviceId() {
+    let id = localStorage.getItem('club_device_id');
+    if (id) return id;
+
+    // 简单设备指纹
+    const info = [
+        navigator.userAgent,
+        screen.width + 'x' + screen.height,
+        screen.colorDepth,
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+        navigator.language,
+        new Date().getTimezoneOffset()
+    ].join('|');
+
+    let hash = 0;
+    for (let i = 0; i < info.length; i++) {
+        const chr = info.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0;
+    }
+    id = 'DEV_' + Math.abs(hash).toString(36).toUpperCase();
+    localStorage.setItem('club_device_id', id);
+    return id;
+}
+
+const deviceId = getDeviceId();
+
+// ===== 卡密验证 =====
+async function doActivate() {
+    const key = document.getElementById('authInput').value.trim();
+    const err = document.getElementById('authErr');
+    const btn = document.getElementById('authBtn');
+
+    if (!key) {
+        err.innerText = '请输入密钥';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = '验证中...';
+    err.innerText = '';
+
+    try {
+        const res = await fetch(API_BASE + '/api/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, deviceId })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            localStorage.setItem('club_key', key);
+            if (data.expireAt) {
+                localStorage.setItem('club_expire', data.expireAt);
+            } else {
+                localStorage.setItem('club_expire', 'permanent');
+            }
+            showApp(data);
+        } else {
+            err.innerText = data.message;
+            btn.disabled = false;
+            btn.innerText = '激 活';
+        }
+    } catch (e) {
+        err.innerText = '网络错误，请检查网络连接';
+        btn.disabled = false;
+        btn.innerText = '激 活';
+    }
+}
+
+function showApp(data) {
+    document.getElementById('authMask').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+
+    if (data.expireAt) {
+        const d = new Date(data.expireAt);
+        document.getElementById('expireInfo').innerText = '到期：' + d.toLocaleDateString('zh-CN');
+    } else {
+        document.getElementById('expireInfo').innerText = '永久授权';
+    }
+}
+
+function logoutAuth() {
+    localStorage.removeItem('club_key');
+    localStorage.removeItem('club_expire');
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('authMask').style.display = 'flex';
+    document.getElementById('authInput').value = '';
+    document.getElementById('authBtn').disabled = false;
+    document.getElementById('authBtn').innerText = '激 活';
+    document.getElementById('authErr').innerText = '';
+}
+
+// 回车激活
+document.getElementById('authInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doActivate();
+});
+
+// 自动验证（之前激活过的）
+(async function autoVerify() {
+    const savedKey = localStorage.getItem('club_key');
+    if (!savedKey) return;
+
+    try {
+        const res = await fetch(API_BASE + '/api/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: savedKey, deviceId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            if (data.expireAt) {
+                localStorage.setItem('club_expire', data.expireAt);
+            }
+            showApp(data);
+        } else {
+            localStorage.removeItem('club_key');
+            localStorage.removeItem('club_expire');
+            document.getElementById('authErr').innerText = data.message;
+        }
+    } catch (e) {
+        // 网络错误时，如果之前验证过，允许离线使用
+        if (localStorage.getItem('club_expire')) {
+            showApp({ expireAt: localStorage.getItem('club_expire') === 'permanent' ? null : localStorage.getItem('club_expire') });
+        }
+    }
+})();
+
+// ===== 计算器逻辑 =====
+const mapConfig = {
+    xunhui:{name:"巡回",price:{green:230,blue:659,purple:2702,orange:11276,red:54739}},
+    yanjing:{name:"燕京",price:{green:230,blue:659,purple:2702,orange:11059,red:52774}},
+    xiangjiang:{name:"香江",price:{green:230,blue:659,purple:2702,orange:11161,red:53938}},
+    nicheng:{name:"霓城",price:{green:230,blue:659,purple:2702,orange:11362,red:54394}},
+    dubai:{name:"迪拜",price:{green:46,blue:132,purple:541,orange:2373,red:55394}}
+};
+let currentMap = "yanjing";
+let currentMode = "classic";
+
+function updateDiscount(){
+    document.getElementById('discountText').innerText = document.getElementById('discountRange').value;
+    calc();
+}
+function switchMap(mapKey){
+    currentMap = mapKey;
+    document.querySelectorAll(".tab-wrap .tab-item").forEach(t=>t.classList.remove("active"));
+    event.target.classList.add("active");
+    resetAll();
+}
+function switchMode(mode){
+    currentMode = mode;
+    document.querySelectorAll(".mode-item").forEach(t=>t.classList.remove("active"));
+    event.target.classList.add("active");
+    document.getElementById('classicMode').style.display = mode==='classic' ? 'block' : 'none';
+    document.getElementById('mapMode').style.display = mode==='map' ? 'block' : 'none';
+}
+function resetAll(){
+    ['green','blue','purple','orange','red','carPart'].forEach(id=>document.getElementById(id).value="");
+    ['bidVal','totalVal','lowBid','midBid','highBid'].forEach(id=>document.getElementById(id).innerText="0");
+    document.getElementById('discountRange').value = 0.85;
+    document.getElementById('discountText').innerText = "0.85";
+    document.getElementById('confFill').style.width = "90%";
+    document.getElementById('confText').innerText = "90%";
+}
+function calc(){
+    const cfg = mapConfig[currentMap];
+    const g = Number(document.getElementById('green').value)||0;
+    const b = Number(document.getElementById('blue').value)||0;
+    const p = Number(document.getElementById('purple').value)||0;
+    const o = Number(document.getElementById('orange').value)||0;
+    const r = Number(document.getElementById('red').value)||0;
+    const car = Number(document.getElementById('carPart').value)||0;
+    const discount = Number(document.getElementById('discountRange').value)||0.85;
+    const gridTotal = g*cfg.price.green + b*cfg.price.blue + p*cfg.price.purple + o*cfg.price.orange + r*cfg.price.red;
+    const total = gridTotal + car;
+    const bid = Math.round(total * discount);
+    document.getElementById('totalVal').innerText = total.toLocaleString();
+    document.getElementById('bidVal').innerText = bid.toLocaleString();
+    document.getElementById('lowBid').innerText = Math.round(total*0.75).toLocaleString();
+    document.getElementById('midBid').innerText = bid.toLocaleString();
+    document.getElementById('highBid').innerText = Math.round(total*0.95).toLocaleString();
+    let conf = 70;
+    if(r>0) conf += Math.min(r*3, 15);
+    if(car>0) conf += 5;
+    if(g+b+p+o+r > 5) conf += 5;
+    conf = Math.min(conf, 98);
+    document.getElementById('confFill').style.width = conf+"%";
+    document.getElementById('confText').innerText = conf+"%";
+}
+</script>
+</body>
+</html>
