@@ -6,7 +6,7 @@
 <title>俱乐部大玩家 · 价值计算器</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft YaHei","SimHei",sans-serif;}
-body{background-color:#0d0c08;min-height:100vh;padding:10px 8px;overflow-x:hidden;}
+body{background:radial-gradient(ellipse at top,#1a1710 0%,#0d0c08 60%);min-height:100vh;padding:10px 8px;overflow-x:hidden;}
 
 /* ===== 粒子背景 ===== */
 #particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
@@ -16,7 +16,10 @@ body{background-color:#0d0c08;min-height:100vh;padding:10px 8px;overflow-x:hidde
 
 /* ===== 登录页 ===== */
 #authMask{position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;
-background:radial-gradient(ellipse at center,#1a1710 0%,#0d0c08 70%);}
+background:url('bg.png') center center/cover no-repeat fixed;}
+#authMask::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;
+background:linear-gradient(135deg,rgba(13,12,8,0.7) 0%,rgba(20,16,10,0.5) 50%,rgba(13,12,8,0.75) 100%);
+backdrop-filter:blur(3px);z-index:0;}
 .auth-box{width:100%;max-width:340px;position:relative;z-index:2;
 background:linear-gradient(145deg,rgba(39,36,24,0.95),rgba(20,18,12,0.98));
 border:1px solid rgba(212,176,88,0.3);border-radius:16px;padding:32px 24px;text-align:center;
@@ -153,6 +156,23 @@ border:1px solid #635024;color:#8a7d5a;font-size:11px;border-radius:7px;cursor:p
 .user-bar .expire{color:#84b8e8;text-shadow:0 0 6px rgba(132,184,232,0.3);}
 .user-bar .logout-link{color:#8a7d5a;cursor:pointer;text-decoration:underline;transition:color 0.2s;}
 .user-bar .logout-link:hover{color:#e88484;}
+
+/* ===== 移动端性能优化 ===== */
+@media (max-width: 768px) {
+    #authMask::before{backdrop-filter:none !important;background:rgba(13,12,8,0.7) !important;}
+    .auth-box{animation:none !important;box-shadow:0 4px 20px rgba(0,0,0,0.4) !important;}
+    .auth-icon{animation:none !important;}
+    .auth-title{animation:none !important;}
+    .result-box::before{display:none !important;}
+    .main-box{animation:none !important;}
+    .role-card:hover{box-shadow:none !important;}
+    .range-item:hover{transform:none !important;}
+}
+
+/* ===== 按钮波纹 ===== */
+.ripple{position:relative;overflow:hidden;}
+.ripple-effect{position:absolute;border-radius:50%;background:rgba(255,221,144,0.4);transform:scale(0);animation:rippleAnim 0.6s linear;pointer-events:none;}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0;}}
 
 /* ===== 激活成功遮罩 ===== */
 #successOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:998;display:none;
@@ -386,7 +406,10 @@ let particles = [];
 function resizeCanvas() { pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight; }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-for (let i = 0; i < 60; i++) {
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+const particleCount = isMobile ? 20 : 60;
+const linkDistance = isMobile ? 0 : 120;
+for (let i = 0; i < particleCount; i++) {
     particles.push({
         x: Math.random() * pCanvas.width,
         y: Math.random() * pCanvas.height,
@@ -412,20 +435,22 @@ function drawParticles() {
         pCtx.shadowColor = 'rgba(212,176,88,0.5)';
     });
     // 连线
+    if (linkDistance > 0) {
     for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 120) {
+            if (dist < linkDistance) {
                 pCtx.beginPath();
                 pCtx.moveTo(particles[i].x, particles[i].y);
                 pCtx.lineTo(particles[j].x, particles[j].y);
-                pCtx.strokeStyle = `rgba(212,176,88,${0.15 * (1 - dist/120)})`;
+                pCtx.strokeStyle = `rgba(212,176,88,${0.15 * (1 - dist/linkDistance)})`;
                 pCtx.lineWidth = 0.5;
                 pCtx.stroke();
             }
         }
+    }
     }
     pCtx.shadowBlur = 0;
     requestAnimationFrame(drawParticles);
@@ -584,6 +609,37 @@ document.getElementById('authInput').addEventListener('keydown', function(e) { i
     }
 })();
 
+// ===== 按钮波纹效果 =====
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.auth-btn, .reset-btn, .tab-item, .mode-item');
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple-effect';
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    btn.style.position = 'relative';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+});
+
+// ===== 数字滚动动画 =====
+function animateNumber(el, target, duration) {
+    duration = duration || 300;
+    const start = parseInt(el.innerText.replace(/,/g, '')) || 0;
+    const startTime = performance.now();
+    function update(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (target - start) * ease);
+        el.innerText = current.toLocaleString();
+        if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+}
+
 // ===== 计算器逻辑 =====
 const mapConfig = {
     xunhui:{name:"巡回",price:{green:230,blue:659,purple:2702,orange:11276,red:54739}},
@@ -606,10 +662,10 @@ function calc(){
     const total = gridTotal + car;
     const bid = Math.round(total * discount);
     document.getElementById('totalVal').innerText = total.toLocaleString();
-    document.getElementById('bidVal').innerText = bid.toLocaleString();
-    document.getElementById('lowBid').innerText = Math.round(total*0.75).toLocaleString();
-    document.getElementById('midBid').innerText = bid.toLocaleString();
-    document.getElementById('highBid').innerText = Math.round(total*0.95).toLocaleString();
+    animateNumber(document.getElementById('bidVal'), bid);
+    animateNumber(document.getElementById('lowBid'), Math.round(total*0.75));
+    animateNumber(document.getElementById('midBid'), bid);
+    animateNumber(document.getElementById('highBid'), Math.round(total*0.95));
     let conf = 70;
     if(r>0) conf += Math.min(r*3, 15);
     if(car>0) conf += 5;
