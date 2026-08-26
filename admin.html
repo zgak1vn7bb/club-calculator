@@ -3,198 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>卡密管理后台</title>
+<title>卡密生成工具</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft YaHei",sans-serif;}
-body{background:#0a0c10;min-height:100vh;padding:20px;color:#e0e0e0;}
-.container{max-width:800px;margin:0 auto;}
-h1{text-align:center;color:#d4b058;margin-bottom:20px;font-size:24px;}
-.login-box{background:linear-gradient(145deg,#1c1e26,#16181f);border:1px solid #3a4050;border-radius:12px;padding:30px;text-align:center;max-width:400px;margin:0 auto;}
-.login-box input{width:100%;padding:12px;background:#0e1015;border:1px solid #3a4050;color:#fff;border-radius:8px;font-size:16px;text-align:center;margin-bottom:15px;}
-.login-box button{width:100%;padding:12px;background:linear-gradient(180deg,#705928,#5c4920);border:1px solid #d4b058;color:#ffdd90;border-radius:8px;font-size:16px;cursor:pointer;}
-.panel{background:linear-gradient(145deg,#1c1e26,#16181f);border:1px solid #3a4050;border-radius:12px;padding:20px;margin-bottom:20px;}
-.panel h2{color:#d4b058;font-size:18px;margin-bottom:15px;}
-.form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
-.form-row label{flex:1;min-width:120px;}
-.form-row span{display:block;font-size:12px;color:#8a8a8a;margin-bottom:5px;}
-.form-row select,.form-row input{width:100%;padding:8px;background:#0e1015;border:1px solid #3a4050;color:#fff;border-radius:6px;}
-.btn{padding:10px 20px;background:linear-gradient(180deg,#705928,#5c4920);border:1px solid #d4b058;color:#ffdd90;border-radius:8px;cursor:pointer;font-size:14px;}
-.btn:hover{background:linear-gradient(180deg,#8b6f2e,#6b5424);}
-.btn-danger{background:linear-gradient(180deg,#8b2e2e,#6b2424);border-color:#e88484;color:#ffaaaa;}
-.keys-output{background:#0e1015;border:1px solid #3a4050;border-radius:8px;padding:15px;margin-top:15px;max-height:300px;overflow-y:auto;}
-.key-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #2a2d35;font-family:'Courier New',monospace;font-size:13px;}
-.key-item:last-child{border-bottom:none;}
-.key-plain{color:#6ee07a;cursor:pointer;}
-.key-plain:hover{text-decoration:underline;}
-.key-info{color:#8a8a8a;font-size:11px;}
-table{width:100%;border-collapse:collapse;margin-top:10px;}
-th,td{padding:8px;text-align:left;border-bottom:1px solid #2a2d35;font-size:12px;}
-th{color:#d4b058;}
-td{color:#b8b8b8;}
-.status-active{color:#e88484;}
-.status-inactive{color:#6ee07a;}
-.copy-all{margin-top:10px;font-size:12px;color:#8a8a8a;cursor:pointer;}
-.copy-all:hover{color:#d4b058;}
-.msg{padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;}
-.msg-error{background:#2a1515;border:1px solid #8b2e2e;color:#e88484;}
-.msg-success{background:#152a15;border:1px solid #2e8b2e;color:#6ee07a;}
-.logout{float:right;color:#8a8a8a;cursor:pointer;font-size:12px;}
-.logout:hover{color:#e88484;}
+body{background:#1c1a11;min-height:100vh;padding:20px;color:#d8c8a0;}
+.container{max-width:700px;margin:0 auto;}
+h1{color:#e6c264;text-align:center;margin-bottom:20px;font-size:20px;}
+.card{background:#272418;border:1px solid #645126;border-radius:8px;padding:16px;margin-bottom:16px;}
+.card h2{color:#e6c264;font-size:15px;margin-bottom:12px;}
+.field-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:11px;color:#8a7d5a;}
+.field input,.field select{padding:7px 10px;background:#14130d;border:1px solid #635024;border-radius:5px;color:#f0e8cc;font-size:13px;outline:none;}
+.field input:focus,.field select:focus{border-color:#d4b058;}
+.btn{padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;border:1px solid #635024;transition:all .2s;}
+.btn-gen{background:#1f3a2a;border-color:#3a8b5a;color:#84e8a8;}
+.btn-gen:hover{background:#284a35;}
+.btn-copy{background:#1f2a3a;border-color:#3a5a8b;color:#84b8e8;}
+.btn-copy:hover{background:#283a4a;}
+.output-box{width:100%;min-height:200px;padding:10px;background:#14130d;border:1px solid #635024;border-radius:6px;color:#6ee07a;font-family:monospace;font-size:12px;resize:vertical;outline:none;}
+.output-box.plain{color:#ffd770;}
+.tip{font-size:11px;color:#8a7d5a;line-height:1.6;margin-top:8px;}
+.tip code{background:#14130d;padding:1px 5px;border-radius:3px;color:#d4b058;}
+.tab-row{display:flex;gap:4px;margin-bottom:12px;}
+.tab{flex:1;text-align:center;padding:8px;border:1px solid #635024;border-radius:6px;cursor:pointer;font-size:12px;color:#b8a678;background:#1e1b12;}
+.tab.active{background:#5c4920;border-color:#d4b058;color:#ffdd90;}
+.section{display:none;}
+.section.active{display:block;}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>卡密管理后台</h1>
+    <h1>卡密生成工具</h1>
 
-<!-- 登录 -->
-<div id="loginPanel" class="login-box">
-<h2 style="color:#d4b058;margin-bottom:20px;">管理员登录</h2>
-<input type="password" id="adminPwd" placeholder="请输入管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
-<button onclick="doLogin()">登 录</button>
-</div>
+    <div class="tab-row">
+        <div class="tab active" onclick="switchTab('gen')">批量生成卡密</div>
+        <div class="tab" onclick="switchTab('single')">单卡查询哈希</div>
+    </div>
 
-<!-- 管理面板 -->
-<div id="adminPanel" style="display:none;">
-<span class="logout" onclick="logout()">退出登录</span>
+    <!-- 批量生成 -->
+    <div id="tab-gen" class="section active">
+        <div class="card">
+            <h2>生成配置</h2>
+            <div class="field-row">
+                <div class="field"><label>生成数量</label><input type="number" id="genCount" value="10" min="1" max="200" style="width:80px;"></div>
+                <div class="field"><label>类型</label>
+                    <select id="genType" style="width:100px;">
+                        <option value="perm">永久</option>
+                        <option value="days">限时</option>
+                    </select>
+                </div>
+                <div class="field" id="daysField" style="display:none;"><label>有效天数</label><input type="number" id="genDays" value="30" min="1" style="width:80px;"></div>
+                <div class="field"><label>备注</label><input type="text" id="genNote" placeholder="选填" style="width:120px;"></div>
+                <button class="btn btn-gen" onclick="generateKeys()">生成</button>
+            </div>
+        </div>
 
-<div class="panel">
-<h2>生成卡密</h2>
-<div class="form-row">
-<label><span>卡密类型</span>
-<select id="cardType">
-<option value="days">限时卡</option>
-<option value="perm">永久卡</option>
-</select></label>
-<label><span>有效天数（限时卡）</span>
-<input type="number" id="cardDays" value="1" min="1"></label>
-<label><span>生成数量</span>
-<input type="number" id="cardCount" value="10" min="1" max="500"></label>
-</div>
-<button class="btn" onclick="generateKeys()">生成卡密</button>
-<div id="generateMsg"></div>
-<div id="keysOutput" class="keys-output" style="display:none;"></div>
-</div>
+        <div class="card">
+            <h2>明文卡密（复制发给用户）</h2>
+            <textarea class="output-box plain" id="plainOutput" readonly placeholder="点击生成后显示..."></textarea>
+            <div style="margin-top:8px;"><button class="btn btn-copy" onclick="copyText('plainOutput')">复制明文卡密</button></div>
+        </div>
 
-<div class="panel">
-<h2>卡密列表</h2>
-<button class="btn" onclick="listKeys()">刷新列表</button>
-<div id="listMsg"></div>
-<div id="listOutput" style="margin-top:10px;"></div>
-</div>
-</div>
+        <div class="card">
+            <h2>哈希数据（复制粘贴到 index.html 的 KEY_DATA 数组里）</h2>
+            <textarea class="output-box" id="hashOutput" readonly placeholder="点击生成后显示..."></textarea>
+            <div style="margin-top:8px;"><button class="btn btn-copy" onclick="copyText('hashOutput')">复制哈希数据</button></div>
+            <div class="tip">
+                使用方法：打开 <code>index.html</code>，找到 <code>const KEY_DATA = [</code>，把上面的哈希行粘贴进去（每行一个）。<br>
+                格式说明：<code>{ h: "哈希值", t: "perm", n: "备注" }</code> 永久卡；<code>{ h: "哈希值", t: "days", d: 30, n: "备注" }</code> 限时卡。
+            </div>
+        </div>
+    </div>
+
+    <!-- 单卡查询 -->
+    <div id="tab-single" class="section">
+        <div class="card">
+            <h2>输入明文卡密，计算哈希</h2>
+            <div class="field-row">
+                <div class="field" style="flex:1;"><label>卡密</label><input type="text" id="singleKey" placeholder="例如 ABCD-1234-EFGH-5678" style="width:100%;"></div>
+                <button class="btn btn-gen" onclick="calcSingle()">计算</button>
+            </div>
+            <div class="field" style="margin-top:10px;">
+                <label>SHA256 哈希</label>
+                <input type="text" id="singleHash" readonly style="width:100%;background:#14130d;border:1px solid #635024;border-radius:5px;color:#6ee07a;padding:7px 10px;font-family:monospace;font-size:12px;">
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-let adminPwd = '';
+document.getElementById('genType').addEventListener('change', function() {
+    document.getElementById('daysField').style.display = this.value === 'days' ? 'flex' : 'none';
+});
 
-function doLogin() {
-    const pwd = document.getElementById('adminPwd').value;
-    if (!pwd) { alert('请输入密码'); return; }
-    adminPwd = pwd;
-    document.getElementById('loginPanel').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    listKeys();
+function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
 }
 
-function logout() {
-    adminPwd = '';
-    document.getElementById('adminPanel').style.display = 'none';
-    document.getElementById('loginPanel').style.display = 'block';
-    document.getElementById('adminPwd').value = '';
+function generateKeyStr() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let key = '';
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) key += chars[Math.floor(Math.random() * chars.length)];
+        if (i < 3) key += '-';
+    }
+    return key;
+}
+
+async function sha256(text) {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(text.trim().toUpperCase()));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
 async function generateKeys() {
-    const type = document.getElementById('cardType').value;
-    const days = parseInt(document.getElementById('cardDays').value) || 1;
-    const count = parseInt(document.getElementById('cardCount').value) || 10;
-    const msgEl = document.getElementById('generateMsg');
-    msgEl.innerHTML = '';
+    const count = parseInt(document.getElementById('genCount').value) || 10;
+    const type = document.getElementById('genType').value;
+    const days = parseInt(document.getElementById('genDays').value) || 30;
+    const note = document.getElementById('genNote').value || '';
 
-    try {
-        const resp = await fetch('/api/admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'generate', password: adminPwd, type, days, count })
-        });
-        const result = await resp.json();
-        if (!result.success) {
-            msgEl.innerHTML = '<div class="msg msg-error">' + result.msg + '</div>';
-            return;
+    const plainLines = [];
+    const hashLines = [];
+
+    for (let i = 0; i < count; i++) {
+        const key = generateKeyStr();
+        const hash = await sha256(key);
+        plainLines.push(key);
+        if (type === 'perm') {
+            hashLines.push('    { h: "' + hash + '", t: "perm", n: "' + note + '" },');
+        } else {
+            hashLines.push('    { h: "' + hash + '", t: "days", d: ' + days + ', n: "' + note + '" },');
         }
-        msgEl.innerHTML = '<div class="msg msg-success">成功生成 ' + result.keys.length + ' 张卡密</div>';
-        const output = document.getElementById('keysOutput');
-        output.style.display = 'block';
-        let html = '';
-        let plainText = '';
-        result.keys.forEach((k, i) => {
-            const typeText = k.type === 'perm' ? '永久' : k.days + '天';
-            html += '<div class="key-item"><span class="key-plain" onclick="copyText(\'' + k.key + '\')" title="点击复制">' + k.key + '</span><span class="key-info">' + typeText + '</span></div>';
-            plainText += k.key + '\n';
-        });
-        html += '<div class="copy-all" onclick="copyText(\'' + plainText.replace(/\n/g,'\\n') + '\')">复制全部卡密</div>';
-        output.innerHTML = html;
-        listKeys();
-    } catch (e) {
-        msgEl.innerHTML = '<div class="msg msg-error">网络错误：' + e.message + '</div>';
     }
+
+    document.getElementById('plainOutput').value = plainLines.join('\n');
+    document.getElementById('hashOutput').value = hashLines.join('\n');
 }
 
-async function listKeys() {
-    const msgEl = document.getElementById('listMsg');
-    const output = document.getElementById('listOutput');
-    msgEl.innerHTML = '';
-    output.innerHTML = '加载中...';
-
-    try {
-        const resp = await fetch('/api/admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'list', password: adminPwd })
-        });
-        const result = await resp.json();
-        if (!result.success) {
-            output.innerHTML = '<div class="msg msg-error">' + result.msg + '</div>';
-            return;
-        }
-        if (result.cards.length === 0) {
-            output.innerHTML = '<div style="color:#8a8a8a;text-align:center;padding:20px;">暂无卡密</div>';
-            return;
-        }
-        let html = '<div style="margin-bottom:10px;color:#8a8a8a;font-size:12px;">共 ' + result.total + ' 张卡密</div>';
-        html += '<table><tr><th>哈希（前16位）</th><th>类型</th><th>状态</th><th>操作</th></tr>';
-        result.cards.forEach(c => {
-            const typeText = c.type === 'perm' ? '永久' : c.days + '天';
-            const statusClass = c.device === '已激活' ? 'status-active' : 'status-inactive';
-            html += '<tr><td style="font-family:monospace;font-size:11px;">' + c.hash.substring(0,16) + '...</td><td>' + typeText + '</td><td class="' + statusClass + '">' + c.device + '</td><td><button class="btn btn-danger" style="padding:4px 8px;font-size:11px;" onclick="deleteKey(\'' + c.hash + '\')">删除</button></td></tr>';
-        });
-        html += '</table>';
-        output.innerHTML = html;
-    } catch (e) {
-        output.innerHTML = '<div class="msg msg-error">网络错误：' + e.message + '</div>';
-    }
+async function calcSingle() {
+    const key = document.getElementById('singleKey').value.trim();
+    if (!key) return;
+    const hash = await sha256(key);
+    document.getElementById('singleHash').value = hash;
 }
 
-async function deleteKey(hash) {
-    if (!confirm('确定删除这张卡密吗？')) return;
-    try {
-        await fetch('/api/admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', password: adminPwd, hash })
-        });
-        listKeys();
-    } catch (e) {
-        alert('删除失败：' + e.message);
-    }
-}
-
-function copyText(text) {
-    text = text.replace(/\\n/g, '\n');
-    navigator.clipboard.writeText(text).then(() => {
-        alert('已复制到剪贴板');
-    }).catch(() => {
-        alert('复制失败，请手动复制');
-    });
+function copyText(id) {
+    const el = document.getElementById(id);
+    el.select();
+    document.execCommand('copy');
+    alert('已复制到剪贴板');
 }
 </script>
 </body>

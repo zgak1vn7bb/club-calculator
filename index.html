@@ -1,20 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>淇变箰閮ㄥぇ鐜╁ 路 浠峰€艰绠楀櫒</title>
+<title>俱乐部大玩家 · 价值计算器</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft YaHei","SimHei",sans-serif;}
 body{background:radial-gradient(ellipse at top,#16181f 0%,#0a0c10 60%);min-height:100vh;padding:10px 8px;overflow-x:hidden;}
 
-/* ===== 绮掑瓙鑳屾櫙 ===== */
+/* ===== 粒子背景 ===== */
 #particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 
-/* ===== 婵€娲荤垎鍙戝眰 ===== */
+/* ===== 激活爆发层 ===== */
 #burstCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1000;pointer-events:none;display:none;}
 
-/* ===== 鐧诲綍椤?===== */
+/* ===== 登录页 ===== */
 #authMask{position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;
 background:url('bg.png') center center/cover no-repeat fixed;}
 #authMask::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;
@@ -59,7 +59,7 @@ transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,176,88,0.3),inset 0 1p
 .auth-qq{margin-top:20px;color:#6b6142;font-size:11px;letter-spacing:1px;}
 .auth-qq span{color:#8a7d5a;}
 
-/* ===== 涓荤晫闈?===== */
+/* ===== 主界面 ===== */
 .main-box{max-width:380px;margin:0 auto;background:linear-gradient(145deg,rgba(30,32,40,0.95),rgba(20,22,28,0.98));
 border:1px solid rgba(80,90,110,0.4);border-radius:14px;padding:14px;position:relative;z-index:2;
 box-shadow:0 0 30px rgba(100,120,160,0.06),0 8px 32px rgba(0,0,0,0.4);
@@ -157,7 +157,7 @@ border:1px solid #3a4050;color:#8a7d5a;font-size:11px;border-radius:7px;cursor:p
 .user-bar .logout-link{color:#8a7d5a;cursor:pointer;text-decoration:underline;transition:color 0.2s;}
 .user-bar .logout-link:hover{color:#e88484;}
 
-/* ===== 绉诲姩绔€ц兘浼樺寲 ===== */
+/* ===== 移动端性能优化 ===== */
 @media (max-width: 768px) {
     #authMask::before{backdrop-filter:none !important;background:rgba(13,12,8,0.7) !important;}
     .auth-box{animation:none !important;box-shadow:0 4px 20px rgba(0,0,0,0.4) !important;}
@@ -169,12 +169,12 @@ border:1px solid #3a4050;color:#8a7d5a;font-size:11px;border-radius:7px;cursor:p
     .range-item:hover{transform:none !important;}
 }
 
-/* ===== 鎸夐挳娉㈢汗 ===== */
+/* ===== 按钮波纹 ===== */
 .ripple{position:relative;overflow:hidden;}
 .ripple-effect{position:absolute;border-radius:50%;background:rgba(255,221,144,0.4);transform:scale(0);animation:rippleAnim 0.6s linear;pointer-events:none;}
 @keyframes rippleAnim{to{transform:scale(4);opacity:0;}}
 
-/* ===== 婵€娲绘垚鍔熼伄缃?===== */
+/* ===== 激活成功遮罩 ===== */
 #successOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:998;display:none;
 background:radial-gradient(circle at center,rgba(212,176,88,0.15),transparent 70%);
 align-items:center;justify-content:center;pointer-events:none;}
@@ -200,97 +200,200 @@ animation:successPop 0.8s cubic-bezier(0.16,1,0.3,1);}
 <canvas id="particleCanvas"></canvas>
 <canvas id="burstCanvas"></canvas>
 
-<div id="successOverlay"><div class="success-text">婵€娲绘垚鍔?/div></div>
+<div id="successOverlay"><div class="success-text">激活成功</div></div>
 
 <div id="authMask">
     <div class="auth-box">
-        <div class="auth-icon">馃攼</div>
-        <div class="auth-title">淇变箰閮ㄥぇ鐜╁</div>
-        <div class="auth-sub">璇疯緭鍏ユ縺娲诲瘑閽ヤ互浣跨敤</div>
-        <input type="text" class="auth-input" id="authInput" placeholder="璇疯緭鍏ュ瘑閽? maxlength="32">
-        <button class="auth-btn" id="authBtn" onclick="doActivate()">婵€ 娲?/button>
+        <div class="auth-icon">🔐</div>
+        <div class="auth-title">俱乐部大玩家</div>
+        <div class="auth-sub">请输入激活密钥以使用</div>
+        <input type="text" class="auth-input" id="authInput" placeholder="请输入密钥" maxlength="32">
+        <button class="auth-btn" id="authBtn" onclick="doActivate()">激 活</button>
         <div class="auth-err" id="authErr"></div>
-        <div class="auth-qq">鑾峰彇瀵嗛挜璇疯仈绯?<span>QQ锛?676023445</span></div>
+        <div class="auth-qq">获取密钥请联系 <span>QQ：3676023445</span></div>
     </div>
 </div>
 
 <div class="main-box" id="mainApp" style="display:none;">
     <div class="user-bar">
-        <span>宸叉巿鏉?/span>
+        <span>已授权</span>
         <span class="expire" id="expireInfo"></span>
-        <span class="logout-link" onclick="logoutAuth()">閫€鍑?/span>
+        <span class="logout-link" onclick="logoutAuth()">退出</span>
     </div>
-    <div class="top-title">淇变箰閮ㄥぇ鐜╁ 路 浠峰€艰绠楀櫒</div>
-    <div class="top-sub">瑙掕壊浼板€?/ 鍦板浘鍒囨崲 / 鍧囨牸鍙嶆煡</div>
-    <div class="author-line">浣滆€?QQ锛?676023445銆€|銆€鈭?姘镐箙</div>
+    <div class="top-title">俱乐部大玩家 · 价值计算器</div>
+    <div class="top-sub">角色估值 / 地图切换 / 均格反查</div>
+    <div class="author-line">作者 QQ：3676023445　|　∞ 永久</div>
     <div class="notice-bar">
-        <span class="notice-icon">鈿?/span>
-        <span>宸″洖妯″紡浼颁环浠呬緵鍙傝€冿紝鐪嬪埌50涓囦互涓婄殑璐х洿鎺ユ鍝堬紝鍏ㄧ▼涓嶄娇鐢ㄩ亾鍏枫€?/span>
+        <span class="notice-icon">⚠</span>
+        <span>巡回模式估价仅供参考，看到50万以上的货直接梭哈，全程不使用道具。</span>
     </div>
     <div class="tab-wrap">
-        <div class="tab-item" onclick="switchMap('xunhui')">宸″洖</div>
-        <div class="tab-item active" onclick="switchMap('yanjing')">鐕曚含</div>
-        <div class="tab-item" onclick="switchMap('xiangjiang')">棣欐睙</div>
-        <div class="tab-item" onclick="switchMap('nicheng')">闇撳煄</div>
-        <div class="tab-item" onclick="switchMap('dubai')">杩嫓</div>
+        <div class="tab-item" onclick="switchMap('xunhui')">巡回</div>
+        <div class="tab-item active" onclick="switchMap('yanjing')">燕京</div>
+        <div class="tab-item" onclick="switchMap('xiangjiang')">香江</div>
+        <div class="tab-item" onclick="switchMap('nicheng')">霓城</div>
+        <div class="tab-item" onclick="switchMap('dubai')">迪拜</div>
     </div>
     <div class="role-card">
         <div class="role-header">
-            <div class="role-avatar">闇?/div>
-            <div class="role-name">闇嶅濮?span class="role-badge">鍔犳潈绮惧噯</span></div>
+            <div class="role-avatar">霍</div>
+            <div class="role-name">霍姑姑<span class="role-badge">加权精准</span></div>
         </div>
         <div class="role-tip">
-            鎺ㄨ崘閬撳叿锛?span class="highlight">绾㈡牸鎬€琛紝宸ㄧ墿浠峰€硷紝鍥涗欢鏀惧ぇ闀滐紝濂緢鎵弿浠紝鍏ㄦ斁澶ч暅</span><br>
-            绾㈡牸杩囧寤鸿鐢ㄥア渚堟壂鎻忎华纭鏄惁鏈夎溅韬紝鏈夊垯濉叆杞﹁韩姹犮€?
+            推荐道具：<span class="highlight">红格怀表，巨物价值，四件放大镜，奢侈扫描仪，全放大镜</span><br>
+            红格过多建议用奢侈扫描仪确认是否有车身，有则填入车身池。
         </div>
     </div>
     <div class="mode-wrap">
-        <div class="mode-item active" onclick="switchMode('classic')">缁忓吀浼板€?/div>
-        <div class="mode-item" onclick="switchMode('map')">鍦板浘娴嬬畻</div>
+        <div class="mode-item active" onclick="switchMode('classic')">经典估值</div>
+        <div class="mode-item" onclick="switchMode('map')">地图测算</div>
     </div>
     <div id="classicMode">
-        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-green"></span><span class="txt-label">缁胯壊锛堟牸鏁帮級</span></div><input type="number" id="green" value="" placeholder="0" oninput="calc()"></div>
-        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-blue"></span><span class="txt-label">钃濊壊锛堟牸鏁帮級</span></div><input type="number" id="blue" value="" placeholder="0" oninput="calc()"></div>
-        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-purple"></span><span class="txt-label">绱壊锛堟牸鏁帮級</span></div><input type="number" id="purple" value="" placeholder="0" oninput="calc()"></div>
-        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-orange"></span><span class="txt-label">姗欒壊锛堟牸鏁帮級</span></div><input type="number" id="orange" value="" placeholder="0" oninput="calc()"></div>
-        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-red"></span><span class="txt-label">绾㈣壊锛堟牸鏁帮級</span></div><input type="number" id="red" value="" placeholder="0" oninput="calc()"></div>
+        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-green"></span><span class="txt-label">绿色（格数）</span></div><input type="number" id="green" value="" placeholder="0" oninput="calc()"></div>
+        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-blue"></span><span class="txt-label">蓝色（格数）</span></div><input type="number" id="blue" value="" placeholder="0" oninput="calc()"></div>
+        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-purple"></span><span class="txt-label">紫色（格数）</span></div><input type="number" id="purple" value="" placeholder="0" oninput="calc()"></div>
+        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-orange"></span><span class="txt-label">橙色（格数）</span></div><input type="number" id="orange" value="" placeholder="0" oninput="calc()"></div>
+        <div class="item-row"><div class="dot-wrap"><span class="color-dot dot-red"></span><span class="txt-label">红色（格数）</span></div><input type="number" id="red" value="" placeholder="0" oninput="calc()"></div>
         <hr class="divider">
-        <div class="car-pool-wrap"><div class="car-pool-label"><span class="color-dot dot-car"></span>杞﹁韩姹?/div><div class="car-pool-btns"><div class="car-pool-btn active" onclick="selectCarPool(0,this)">鏃?/div><div class="car-pool-btn" onclick="selectCarPool(90000,this)">+1 9涓?/div><div class="car-pool-btn" onclick="selectCarPool(150000,this)">+2 15涓?/div><div class="car-pool-btn" onclick="selectCarPool(300000,this)">+3 30涓?/div></div></div>
+        <div class="car-pool-wrap"><div class="car-pool-label"><span class="color-dot dot-car"></span>车身池</div><div class="car-pool-btns"><div class="car-pool-btn active" onclick="selectCarPool(0,this)">无</div><div class="car-pool-btn" onclick="selectCarPool(90000,this)">+1 9万</div><div class="car-pool-btn" onclick="selectCarPool(150000,this)">+2 15万</div><div class="car-pool-btn" onclick="selectCarPool(300000,this)">+3 30万</div></div></div>
         <div class="discount-row">
-            <div class="discount-label"><span>鍑轰环鎶樻墸绯绘暟</span><span class="discount-val" id="discountText">0.85</span></div>
+            <div class="discount-label"><span>出价折扣系数</span><span class="discount-val" id="discountText">0.85</span></div>
             <input type="range" id="discountRange" min="0.5" max="1.0" step="0.01" value="0.85" oninput="updateDiscount()">
         </div>
         <div class="result-box">
             <div class="result-area">
-                <div class="res-block bid"><div class="res-tip">鎺ㄨ崘鍑轰环</div><div class="res-num" id="bidVal">0</div></div>
+                <div class="res-block bid"><div class="res-tip">推荐出价</div><div class="res-num" id="bidVal">0</div></div>
                 <div class="res-divider"></div>
-                <div class="res-block total"><div class="res-tip">棰勪及浠撲綅浠峰€?/div><div class="res-num" id="totalVal">0</div></div>
+                <div class="res-block total"><div class="res-tip">预估仓位价值</div><div class="res-num" id="totalVal">0</div></div>
             </div>
             <div class="range-row">
-                <div class="range-item low"><div class="rt">淇濆畧 0.75</div><div class="rv" id="lowBid">0</div></div>
-                <div class="range-item mid"><div class="rt">褰撳墠</div><div class="rv" id="midBid">0</div></div>
-                <div class="range-item high"><div class="rt">婵€杩?0.95</div><div class="rv" id="highBid">0</div></div>
+                <div class="range-item low"><div class="rt">保守 0.75</div><div class="rv" id="lowBid">0</div></div>
+                <div class="range-item mid"><div class="rt">当前</div><div class="rv" id="midBid">0</div></div>
+                <div class="range-item high"><div class="rt">激进 0.95</div><div class="rv" id="highBid">0</div></div>
             </div>
             <div class="profit-row">
-                <div class="profit-item"><div class="pt">棰勬湡鎴愪氦</div><div class="pv" id="expectDeal">0</div></div>
-                <div class="profit-item"><div class="pt">棰勬湡鍒╂鼎</div><div class="pv profit" id="expectProfit">0</div></div>
+                <div class="profit-item"><div class="pt">预期成交</div><div class="pv" id="expectDeal">0</div></div>
+                <div class="profit-item"><div class="pt">预期利润</div><div class="pv profit" id="expectProfit">0</div></div>
             </div>
             <div class="confidence-row">
-                <div class="confidence-label"><span>缃俊搴?/span><span class="confidence-val" id="confText">90%</span></div>
+                <div class="confidence-label"><span>置信度</span><span class="confidence-val" id="confText">90%</span></div>
                 <div class="confidence-bar"><div class="confidence-fill" id="confFill"></div></div>
             </div>
         </div>
-        <button class="reset-btn" onclick="resetAll()">閲嶇疆鏁版嵁</button>
+        <button class="reset-btn" onclick="resetAll()">重置数据</button>
     </div>
     <div id="mapMode" style="display:none;">
-        <div class="role-tip" style="text-align:center;padding:30px 0;color:#8a7d5a;">鍦板浘娴嬬畻妯″紡寮€鍙戜腑...</div>
+        <div class="role-tip" style="text-align:center;padding:30px 0;color:#8a7d5a;">地图测算模式开发中...</div>
     </div>
 </div>
 
 <script>
 // ============================================================
-//  鍗″瘑鏁版嵁鍖?
+//  卡密数据区
 // ============================================================
+const KEY_DATA = [
+    { h: "52f53545d8f9b709d56649a3f1711d02c9def1a9e29f8d9d36fa189c83ecd97f", t: "days", d: 1, n: "" },
+    { h: "a56dcc49cc1e5702006749d8d4584be62d986ec4237a2504ddb152d8a561f4ff", t: "days", d: 1, n: "" },
+    { h: "96ea6e53436cf29df739d0f7245b861c84af9e8eb73e1c933cb0fd414decdc4b", t: "days", d: 1, n: "" },
+    { h: "0edfd70b29b8ce412c7c4fa5965de289b64d274299d7e5c40d86e314be60a0ba", t: "days", d: 1, n: "" },
+    { h: "ff362fa82d27750822a44e027168d3a0e06186fa81d265d3adcf6e326acce38a", t: "days", d: 1, n: "" },
+    { h: "c81974c68c8db3415c16eda4ab71ec0b606d9f56e05892a1211221c1965e10fb", t: "days", d: 1, n: "" },
+    { h: "8b7b17af6b5d1a7d444ed8624f99563c8feb4a9485d8af31d0c760fd19a3e75a", t: "days", d: 1, n: "" },
+    { h: "9cff66702fd9cfd4519c7f84af71e5d2ff123a62a893689f4bad54988f3a1722", t: "days", d: 1, n: "" },
+    { h: "c2249b01570bd1912a7325db019d4142b6e169aaf178a2abc75dfb6f91ff7de8", t: "days", d: 1, n: "" },
+    { h: "2b612ae3b02c522c72eb5dcff08eb5a66dd1f0537ea7c3224b4fd068fb7f560e", t: "days", d: 1, n: "" },
+    { h: "713fef115448e92c197c48e59ec92429803c296c8660cdd2ca2abf8d84f9aba6", t: "days", d: 1, n: "" },
+    { h: "f33a3a4f2978c45b8ad504c2d8424b8d075d9dbcb23ab4c7bd0f200cbbacc36c", t: "days", d: 1, n: "" },
+    { h: "72da476fc1b7c30606f46767be8bb452641a05aaf2c9dac9678e7a3622974014", t: "days", d: 1, n: "" },
+    { h: "b67727dd8953de724ade1c51641d1328ffe1cf97a2a96a3c9438d28036b1409e", t: "days", d: 1, n: "" },
+    { h: "1eb4c0212c60f03972519ecd25a0b83bf6f03d2d980e71d58e581ea3e82a8b11", t: "days", d: 1, n: "" },
+    { h: "a5a76f2641ddf7cdd21c840b70c747a765a54e10810b144845981e0cbc7de647", t: "days", d: 1, n: "" },
+    { h: "2665d7f63ea26388b61003cde7ed585c71762311bb345bda096fb6b5b2b1099d", t: "days", d: 1, n: "" },
+    { h: "81fe2ccf83fb68604e23a5363cf45a2ddf76a3b189be727acb0f948068ce2e10", t: "days", d: 1, n: "" },
+    { h: "5e7844b2d39f9223d5f028b648eb0a1754e977c276f2f152f37c10aa82db8054", t: "days", d: 1, n: "" },
+    { h: "43855c6b69471439935e2ac64bfb568d33e6dccb8bded320a46c238a8f04e4e5", t: "days", d: 1, n: "" },
+    { h: "72300e8019530a581450d2c6f97a5be095a4eacf8f49bc65538dafeadd1a8413", t: "days", d: 1, n: "" },
+    { h: "8c026cdeb5d4ceb2f2c9164d44b28cec4618af2b1d2e8cb071794b1b0fb39090", t: "days", d: 1, n: "" },
+    { h: "479cf69e686479b8126d72f6a51e9cf7221b281e980d7d958d01f918faae11f5", t: "days", d: 1, n: "" },
+    { h: "c0918a4796ad7fb5b13a00270a5b320c0f908cf97711661e74910cda91eb40e5", t: "days", d: 1, n: "" },
+    { h: "0f27bef61d065fcccfe3a0274fa5dba89aa00345fa688ef29c5990836500b8ec", t: "days", d: 1, n: "" },
+    { h: "a91279fb9fcd208ee7278d769271ee82e0b4cb38208fd88801e184c3ea10104f", t: "days", d: 1, n: "" },
+    { h: "0738eb5215c47af6a05e6264698f6e0a81397eb3ed36adb31b6985a1dbd47c2e", t: "days", d: 1, n: "" },
+    { h: "ea6af9aede0218759a4078ee465a1f93de20af6dce175d8a2ed0e02e25cda361", t: "days", d: 1, n: "" },
+    { h: "8287855e74154b877e59a0be9d99662380a882b613c79893b332ab9376db66dd", t: "days", d: 1, n: "" },
+    { h: "ce8623bbfd0ac48d39158a436d027e5d6dfb9e294f5bc6951d101fbba7b73a16", t: "days", d: 1, n: "" },
+    { h: "e8660e5f36278c728e7067eebcf5cebb35c2e29952fd5b6ea859ca2a3264e6f4", t: "days", d: 1, n: "" },
+    { h: "e312edfd3a663bda2f866da96ae0ed240d55ce81419f517669da80a43b4bd470", t: "days", d: 1, n: "" },
+    { h: "6df5331cfd3dbae506c8ca1f1f4ae22bae8885d084a9f0e28b45e28ae4ba528c", t: "days", d: 1, n: "" },
+    { h: "fb8d3cb1ddfeaf9deafc97c9819e158fd4f775262faeb77d83a6453905479c01", t: "days", d: 1, n: "" },
+    { h: "d836c963dc96f419dfc62555aca28f2e8ea358e6dbcc551548b79732289500e5", t: "days", d: 1, n: "" },
+    { h: "45a9712a32ae72f2020c5acc0ab8cda507f576f5698f28e74a924f099bd7f946", t: "days", d: 1, n: "" },
+    { h: "041d66362ae6881e406172a2c468f5fad9fb92876226f7982685502e68df3740", t: "days", d: 1, n: "" },
+    { h: "e8798cdf0149cf7a147cf7a955f82a47e1b72334654a84600f9cd3aac992d9ff", t: "days", d: 1, n: "" },
+    { h: "e7803d565d3ca4d7176ad10e929761c7d8504d474148d04f295e33bc6ce9bea0", t: "days", d: 1, n: "" },
+    { h: "151a1ad96a78a121b83653f8848baa141ce37343fb7d18395f07c8de5b12e692", t: "days", d: 1, n: "" },
+    { h: "06a019dd9285668dd524f083596dd303fbcc46a425be3a9937d0d3714980b853", t: "days", d: 1, n: "" },
+    { h: "75f25f9162a92a7c22b340b9de08349d96611f24c0be2caea632420266fdf016", t: "days", d: 1, n: "" },
+    { h: "b3756c8c940613d12a0302956eef8de5e096f21d04f97de49ee919f9329dae20", t: "days", d: 1, n: "" },
+    { h: "0fb2802c1e6ec255652524e7dee1eba95f205816290a8ce99c4a407da4d6fb2e", t: "days", d: 1, n: "" },
+    { h: "7b7beb2552b7cc43878112caa46e123350574bc49c309c9774cc70460862f6c3", t: "days", d: 1, n: "" },
+    { h: "5e49f04cac5de29417d2dc487615d46d376b947fbeb4cec355d1311aed098165", t: "days", d: 1, n: "" },
+    { h: "5d0014e6eb09daefc669c51279388363a256ffed93bcaac926343023b38683a2", t: "days", d: 1, n: "" },
+    { h: "6a69d4665c25ea54899918ddd00ddd640c6965b6a6f078c18102f9e75d2eb6d4", t: "days", d: 1, n: "" },
+    { h: "0c3cdb7058f537e13f9cdde394c3243cd68ba9f294c959c6ff8f6f5f170a2e75", t: "days", d: 1, n: "" },
+    { h: "0d5fccebf89f34e16e954c3ef93d883a9077081e52cb3c5a643e8eee0cf7b3f7", t: "days", d: 1, n: "" },
+    { h: "dc07e2610f646ee486498541149b3e358e8b402eee0f088e54e7430da4a69cc5", t: "days", d: 1, n: "" },
+    { h: "163f26c86803b162d40a74cc2d83de6f30883cbd05446709520f6de09fe3abcc", t: "days", d: 1, n: "" },
+    { h: "4bc4515ce3283a4688e4720abdf4efcc9e31fa74d5495ba2ed6aecd158ecb887", t: "days", d: 1, n: "" },
+    { h: "9c5f4fa10882016608b7bb57b4b2fc8c05df91d72a0947b254e88eef8e510433", t: "days", d: 1, n: "" },
+    { h: "3021ac593597eae7680d30a831f043eb4cea56fd0a8155fc6d03bd28fb134861", t: "days", d: 1, n: "" },
+    { h: "0f1635a29cbebc1eddd2ebb2106696c72775e67f25c6cade0d3c50abb0f00315", t: "days", d: 1, n: "" },
+    { h: "0aae8aa6e958c8983693b6be3614123fef10581f3ab777023c7baf3f773156ea", t: "days", d: 1, n: "" },
+    { h: "772a750ca2590ae245bfccd317793b56177694a7a7a466275329a953343d422d", t: "days", d: 1, n: "" },
+    { h: "270be8e534c7068b157d90d0ca7dbc82c273efc0110c35c6721791f8c9c99c7d", t: "days", d: 1, n: "" },
+    { h: "299fdcb07f9c78e35b889646adeecbcbe008bd3c501cb92b51a36aba424b3ff9", t: "days", d: 1, n: "" },
+    { h: "0ef036db5f9070e793e837ab88334f9399b85bd226d14e35f0e4e15a259c21b6", t: "days", d: 1, n: "" },
+    { h: "08d9e94d600d89ffb47dd9ad1eab8ca3b4b7213ecdef829b7ab7f007a4faec7a", t: "days", d: 1, n: "" },
+    { h: "7a03194d16c44a54546753a4251b0cd1ba788767af27a3e737813fe3a39d1426", t: "days", d: 1, n: "" },
+    { h: "bbafda2378949bf461d792a833ec19866c2ffe1b7df6e8c1715d45987482eff0", t: "days", d: 1, n: "" },
+    { h: "e0c8d82c6a7ead40b92a7fcb48541c5360c35def2cc89fb904d6fe13c2862094", t: "days", d: 1, n: "" },
+    { h: "60a7b6d6251bed48034e982ba9cc8ca72363354845e7f559e989754071e6d2f4", t: "days", d: 1, n: "" },
+    { h: "e122593d5556bfd1deb1a9df5a5e5984d8441ecbb58fdf5fd7cbf7d47398a2f5", t: "days", d: 1, n: "" },
+    { h: "336a6e1954b1804a71890c8b76792283b018dc697c5156a8f88a22ad2c5fa3ae", t: "days", d: 1, n: "" },
+    { h: "1eed20715e10e0a412b126f49fd3ad2540e1c1e753c11de143a0fb4e874a1d0b", t: "days", d: 1, n: "" },
+    { h: "61faa9356cb885db3554739de4f45c7ffef27a37b6e4eef48a66da306cc444a8", t: "days", d: 1, n: "" },
+    { h: "4a0b7fa7bc1f343317b475d068413bd03b514a7b67b2230ff71a6c17875f3b6f", t: "days", d: 1, n: "" },
+    { h: "9336ffc48d109e381ec2ba3d0bf22f8b91bc613afcfc444a5f4b4b611a4da77b", t: "days", d: 1, n: "" },
+    { h: "9d4c23399ac1bc59a6f58e94021db1202b37e542b6db2fae1027eeb18de31b69", t: "days", d: 1, n: "" },
+    { h: "285b4212572b3cdf042363244fb3ec5e60455be86a98828c3ca97d3d3e7c6916", t: "days", d: 1, n: "" },
+    { h: "1fe784a4ea8d706deb732b0bdc471483262293cd792990aa816227151404a390", t: "days", d: 1, n: "" },
+    { h: "13313940c7c586bee0bc783d62c5ff8faef728a95e382a3feda86ffe4e5aa057", t: "days", d: 1, n: "" },
+    { h: "823166030dec3b1d642665b6c2d5508c73c4de89ed077303a9fdc8af22d1515c", t: "days", d: 1, n: "" },
+    { h: "be5f6269a16c4b4aef6a03f00cb126fbfa237e2523a0d07cd1d2f913b7d3866f", t: "days", d: 1, n: "" },
+    { h: "bd7b27bd96f58ac66e597ad0dbaa8e3858a4006f8cbc1876bf3929b12dcd918d", t: "days", d: 1, n: "" },
+    { h: "c2a652fb13216bde2cad92f62aba70996fac1cf9beaacccfd528ce6b3eebf759", t: "days", d: 1, n: "" },
+    { h: "be57dca271df77750138aa2659a6d48cf27b0cdfd6f792c5f2d6155243a7b4ce", t: "days", d: 1, n: "" },
+    { h: "55907afd53057ec9ec2ea7d2fbd302d30dd176c56c28fbb9c9f4d2afbe62e3d1", t: "days", d: 1, n: "" },
+    { h: "b711a2e353b7c37d08662ac558d6b366c4c8c072b81172ef4331d2000135b240", t: "days", d: 1, n: "" },
+    { h: "fe12c189eb30765e7fd5257dd24d4e1f2399ec14ef7edd2d849359e86f7a2f5a", t: "days", d: 1, n: "" },
+    { h: "361d9aed3623293481eebfecaa10f655ddd66a3facb05e80155ac0954fa7e504", t: "days", d: 1, n: "" },
+    { h: "b20b4a34dcde1ed2c257f46253df085ff0a06d0c03fc045992d0d40c2273633f", t: "days", d: 1, n: "" },
+    { h: "b7f30b673c21df68701dbca9b11a96d77b117cb690ce8dca7fc105f99bee09a8", t: "days", d: 1, n: "" },
+    { h: "8f52e6f395da686e20d4517db0ce7c09313b2048a0c74b8d235acb8f18821976", t: "days", d: 1, n: "" },
+    { h: "6693c61d41f4def96cc77b15fc9e7c3ec0d6850ca997c3753ae29863ee8ab67a", t: "days", d: 1, n: "" },
+    { h: "4f8783a19f9bdbf25db17ec3bf674e60ef72c80579d5131d4e69e90782b55d8f", t: "days", d: 1, n: "" },
+    { h: "a95253cf57975724d31ccd1daa6804929742bf1362288dbdc1bd1f827389da75", t: "days", d: 1, n: "" },
+    { h: "bdf255fe735a9de9e7523e8ff3a2c0e63ca5c96115fc26828146ea25a9e44fb6", t: "days", d: 1, n: "" },
+    { h: "552dc6c4565efcaec0377c6a05cf2d6f5578ec25379f05d5208128ea97b3470f", t: "days", d: 1, n: "" },
+    { h: "debedfda0ca6ced0cba20a43a21c2fafc12ea0080e0a5c90e09b265c95b5dfd8", t: "days", d: 1, n: "" },
+    { h: "08834e9971453a7468c2b2aa5e5d8bb36c1e2e43f668086109f4a7f6676317e2", t: "days", d: 1, n: "" },
+    { h: "ebc1b7e266e11ea842d7139dbc7b6ad2be3b1b83369410eb07d463a755e6eeaf", t: "days", d: 1, n: "" },
+    { h: "a08864a9b0afec1efb0e5bc7274fdcd4aaa5dc413a0a38846f0ce9f9c9705334", t: "days", d: 1, n: "" },
+    { h: "8d55902b9ce25488d4cf7e1bf312d7063ad339fb13d7d772291a249ae7c3d40b", t: "days", d: 1, n: "" },
+    { h: "f7195044493312c4619aa6c1d97a91356c6558dd4b8b7d539a66f689219cffe6", t: "days", d: 1, n: "" },
+    { h: "8d27d76e851d0e03139e034e48233f2928049f0a01be654b1cdf5c20616c0ebc", t: "days", d: 1, n: "" }
+];
+
 // ===== SHA256 =====
 async function sha256(text) {
     const enc = new TextEncoder();
@@ -298,7 +401,7 @@ async function sha256(text) {
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// ===== 璁惧鎸囩汗 =====
+// ===== 设备指纹 =====
 function getDeviceId() {
     let id = localStorage.getItem('_cd_id');
     if (id) return id;
@@ -311,7 +414,7 @@ function getDeviceId() {
 }
 const deviceId = getDeviceId();
 
-// ===== 绮掑瓙鑳屾櫙 =====
+// ===== 粒子背景 =====
 const pCanvas = document.getElementById('particleCanvas');
 const pCtx = pCanvas.getContext('2d');
 let particles = [];
@@ -346,7 +449,7 @@ function drawParticles() {
         pCtx.shadowBlur = 8;
         pCtx.shadowColor = 'rgba(212,176,88,0.5)';
     });
-    // 杩炵嚎
+    // 连线
     if (linkDistance > 0) {
     for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -369,7 +472,7 @@ function drawParticles() {
 }
 drawParticles();
 
-// ===== 婵€娲荤垎鍙戠壒鏁?=====
+// ===== 激活爆发特效 =====
 const bCanvas = document.getElementById('burstCanvas');
 const bCtx = bCanvas.getContext('2d');
 let burstParticles = [];
@@ -420,7 +523,7 @@ function animateBurst() {
     }
 }
 
-// ===== 鍗″瘑楠岃瘉 =====
+// ===== 卡密验证 =====
 async function doActivate() {
     const key = document.getElementById('authInput').value.trim();
     const err = document.getElementById('authErr');
@@ -429,30 +532,34 @@ async function doActivate() {
     btn.disabled = true; btn.innerText = '验证中...'; err.innerText = '';
 
     try {
-        const resp = await fetch('/api/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key: key, device: deviceId })
-        });
-        const result = await resp.json();
-
-        if (!result.success) {
-            err.innerText = result.msg || '验证失败';
+        const hash = await sha256(key);
+        const record = KEY_DATA.find(k => k.h === hash);
+        if (!record) {
+            err.innerText = '卡密不存在，请联系QQ：3676023445';
             btn.disabled = false; btn.innerText = '激 活';
             return;
         }
-
-        const actData = { h: result.hash, dev: deviceId, at: result.activatedAt, t: result.type, d: result.days || 0 };
+        const saved = localStorage.getItem('_cd_act');
+        if (saved) {
+            const act = JSON.parse(saved);
+            if (act.h !== hash) {
+                err.innerText = '本设备已激活其他卡密，无法重复激活';
+                btn.disabled = false; btn.innerText = '激 活';
+                return;
+            }
+        }
+        const now = Date.now();
+        const actData = { h: hash, dev: deviceId, at: now, t: record.t, d: record.d || 0 };
         localStorage.setItem('_cd_act', JSON.stringify(actData));
-
         let expireAt = null;
-        if (result.type === 'days' && result.days > 0) {
-            expireAt = new Date(result.activatedAt + result.days * 86400000).toISOString();
+        if (record.t === 'days' && record.d > 0) {
+            expireAt = new Date(now + record.d * 86400000).toISOString();
             localStorage.setItem('_cd_exp', expireAt);
         } else {
             localStorage.setItem('_cd_exp', 'perm');
         }
 
+        // 激活特效
         triggerBurst();
         document.getElementById('successOverlay').style.display = 'flex';
 
@@ -463,16 +570,17 @@ async function doActivate() {
             showApp({ expireAt });
         }, 1200);
     } catch (e) {
-        err.innerText = '网络错误，请检查网络后重试';
+        err.innerText = '验证出错，请重试';
         btn.disabled = false; btn.innerText = '激 活';
     }
 }
+
 function showApp(data) {
     if (data.expireAt) {
         const d = new Date(data.expireAt);
-        document.getElementById('expireInfo').innerText = '鍒版湡锛? + d.toLocaleDateString('zh-CN');
+        document.getElementById('expireInfo').innerText = '到期：' + d.toLocaleDateString('zh-CN');
     } else {
-        document.getElementById('expireInfo').innerText = '姘镐箙鎺堟潈';
+        document.getElementById('expireInfo').innerText = '永久授权';
     }
 }
 
@@ -483,58 +591,40 @@ function logoutAuth() {
     document.getElementById('authMask').style.display = 'flex';
     document.getElementById('authInput').value = '';
     document.getElementById('authBtn').disabled = false;
-    document.getElementById('authBtn').innerText = '婵€ 娲?;
+    document.getElementById('authBtn').innerText = '激 活';
     document.getElementById('authErr').innerText = '';
 }
 
 document.getElementById('authInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') doActivate(); });
 
-// 自动验证（调用后端API）
-(async function autoVerify() {
+// 自动验证
+(function autoVerify() {
     const act = localStorage.getItem('_cd_act');
     if (!act) return;
     try {
         const data = JSON.parse(act);
-        const resp = await fetch('/api/check', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ hash: data.h, device: deviceId })
-        });
-        const result = await resp.json();
-
-        if (!result.valid) {
-            localStorage.removeItem('_cd_act');
-            localStorage.removeItem('_cd_exp');
-            document.getElementById('authErr').innerText = result.msg || '验证失败，请重新激活';
-            return;
-        }
-
-        document.getElementById('authMask').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        if (result.type === 'days' && result.expireAt) {
-            showApp({ expireAt: new Date(result.expireAt).toISOString() });
+        if (data.t === 'days' && data.d > 0) {
+            const expireTime = data.at + data.d * 86400000;
+            if (Date.now() > expireTime) {
+                localStorage.removeItem('_cd_act');
+                localStorage.removeItem('_cd_exp');
+                document.getElementById('authErr').innerText = '卡密已过期，请联系QQ：3676023445续费';
+                return;
+            }
+            document.getElementById('authMask').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            showApp({ expireAt: new Date(expireTime).toISOString() });
         } else {
+            document.getElementById('authMask').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
             showApp({ expireAt: null });
         }
     } catch (e) {
-        // 网络错误兜底：用本地数据判断
-        try {
-            const data = JSON.parse(act);
-            if (data.t === 'days' && data.d > 0) {
-                const expireTime = data.at + data.d * 86400000;
-                if (Date.now() > expireTime) { localStorage.removeItem('_cd_act'); localStorage.removeItem('_cd_exp'); return; }
-                document.getElementById('authMask').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                showApp({ expireAt: new Date(expireTime).toISOString() });
-            } else {
-                document.getElementById('authMask').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                showApp({ expireAt: null });
-            }
-        } catch (e2) { localStorage.removeItem('_cd_act'); }
+        localStorage.removeItem('_cd_act');
     }
 })();
-// ===== 鎸夐挳娉㈢汗鏁堟灉 =====
+
+// ===== 按钮波纹效果 =====
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('.auth-btn, .reset-btn, .tab-item, .mode-item');
     if (!btn) return;
@@ -550,7 +640,7 @@ document.addEventListener('click', function(e) {
     setTimeout(() => ripple.remove(), 600);
 });
 
-// ===== 鏁板瓧婊氬姩鍔ㄧ敾 =====
+// ===== 数字滚动动画 =====
 function animateNumber(el, target, duration) {
     duration = duration || 300;
     const start = parseInt(el.innerText.replace(/,/g, '')) || 0;
@@ -565,13 +655,13 @@ function animateNumber(el, target, duration) {
     requestAnimationFrame(update);
 }
 
-// ===== 璁＄畻鍣ㄩ€昏緫 =====
+// ===== 计算器逻辑 =====
 const mapConfig = {
-    xunhui:{name:"宸″洖",price:{green:230,blue:659,purple:2702,orange:11276,red:54739}},
-    yanjing:{name:"鐕曚含",price:{green:230,blue:659,purple:2702,orange:11059,red:52774}},
-    xiangjiang:{name:"棣欐睙",price:{green:230,blue:659,purple:2702,orange:11161,red:53938}},
-    nicheng:{name:"闇撳煄",price:{green:230,blue:659,purple:2702,orange:11362,red:53394}},
-    dubai:{name:"杩嫓",price:{green:46,blue:132,purple:540,orange:2273,red:10479}}
+    xunhui:{name:"巡回",price:{green:230,blue:659,purple:2702,orange:11276,red:54739}},
+    yanjing:{name:"燕京",price:{green:230,blue:659,purple:2702,orange:11059,red:52774}},
+    xiangjiang:{name:"香江",price:{green:230,blue:659,purple:2702,orange:11161,red:53938}},
+    nicheng:{name:"霓城",price:{green:230,blue:659,purple:2702,orange:11362,red:53394}},
+    dubai:{name:"迪拜",price:{green:46,blue:132,purple:540,orange:2273,red:10479}}
 };
 let currentMap = "yanjing", currentMode = "classic";
 let carPoolValue = 0;
