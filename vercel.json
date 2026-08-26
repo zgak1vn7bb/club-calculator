@@ -1,6 +1,4 @@
 {
-  "version": 2,
-  "buildCommand": "echo no build needed",
   "functions": {
     "api/*.js": {
       "maxDuration": 10
