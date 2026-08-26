@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡密管理后台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft YaHei",sans-serif;}
+body{background:#0a0c10;min-height:100vh;padding:20px;color:#e0e0e0;}
+.container{max-width:800px;margin:0 auto;}
+h1{text-align:center;color:#d4b058;margin-bottom:20px;font-size:24px;}
+.login-box{background:linear-gradient(145deg,#1c1e26,#16181f);border:1px solid #3a4050;border-radius:12px;padding:30px;text-align:center;max-width:400px;margin:0 auto;}
+.login-box input{width:100%;padding:12px;background:#0e1015;border:1px solid #3a4050;color:#fff;border-radius:8px;font-size:16px;text-align:center;margin-bottom:15px;}
+.login-box button{width:100%;padding:12px;background:linear-gradient(180deg,#705928,#5c4920);border:1px solid #d4b058;color:#ffdd90;border-radius:8px;font-size:16px;cursor:pointer;}
+.panel{background:linear-gradient(145deg,#1c1e26,#16181f);border:1px solid #3a4050;border-radius:12px;padding:20px;margin-bottom:20px;}
+.panel h2{color:#d4b058;font-size:18px;margin-bottom:15px;}
+.form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.form-row label{flex:1;min-width:120px;}
+.form-row span{display:block;font-size:12px;color:#8a8a8a;margin-bottom:5px;}
+.form-row select,.form-row input{width:100%;padding:8px;background:#0e1015;border:1px solid #3a4050;color:#fff;border-radius:6px;}
+.btn{padding:10px 20px;background:linear-gradient(180deg,#705928,#5c4920);border:1px solid #d4b058;color:#ffdd90;border-radius:8px;cursor:pointer;font-size:14px;}
+.btn:hover{background:linear-gradient(180deg,#8b6f2e,#6b5424);}
+.btn-danger{background:linear-gradient(180deg,#8b2e2e,#6b2424);border-color:#e88484;color:#ffaaaa;}
+.keys-output{background:#0e1015;border:1px solid #3a4050;border-radius:8px;padding:15px;margin-top:15px;max-height:300px;overflow-y:auto;}
+.key-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #2a2d35;font-family:'Courier New',monospace;font-size:13px;}
+.key-item:last-child{border-bottom:none;}
+.key-plain{color:#6ee07a;cursor:pointer;}
+.key-plain:hover{text-decoration:underline;}
+.key-info{color:#8a8a8a;font-size:11px;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{padding:8px;text-align:left;border-bottom:1px solid #2a2d35;font-size:12px;}
+th{color:#d4b058;}
+td{color:#b8b8b8;}
+.status-active{color:#e88484;}
+.status-inactive{color:#6ee07a;}
+.copy-all{margin-top:10px;font-size:12px;color:#8a8a8a;cursor:pointer;}
+.copy-all:hover{color:#d4b058;}
+.msg{padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;}
+.msg-error{background:#2a1515;border:1px solid #8b2e2e;color:#e88484;}
+.msg-success{background:#152a15;border:1px solid #2e8b2e;color:#6ee07a;}
+.logout{float:right;color:#8a8a8a;cursor:pointer;font-size:12px;}
+.logout:hover{color:#e88484;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>卡密管理后台</h1>
+
+<!-- 登录 -->
+<div id="loginPanel" class="login-box">
+<h2 style="color:#d4b058;margin-bottom:20px;">管理员登录</h2>
+<input type="password" id="adminPwd" placeholder="请输入管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+<button onclick="doLogin()">登 录</button>
+</div>
+
+<!-- 管理面板 -->
+<div id="adminPanel" style="display:none;">
+<span class="logout" onclick="logout()">退出登录</span>
+
+<div class="panel">
+<h2>生成卡密</h2>
+<div class="form-row">
+<label><span>卡密类型</span>
+<select id="cardType">
+<option value="days">限时卡</option>
+<option value="perm">永久卡</option>
+</select></label>
+<label><span>有效天数（限时卡）</span>
+<input type="number" id="cardDays" value="1" min="1"></label>
+<label><span>生成数量</span>
+<input type="number" id="cardCount" value="10" min="1" max="500"></label>
+</div>
+<button class="btn" onclick="generateKeys()">生成卡密</button>
+<div id="generateMsg"></div>
+<div id="keysOutput" class="keys-output" style="display:none;"></div>
+</div>
+
+<div class="panel">
+<h2>卡密列表</h2>
+<button class="btn" onclick="listKeys()">刷新列表</button>
+<div id="listMsg"></div>
+<div id="listOutput" style="margin-top:10px;"></div>
+</div>
+</div>
+</div>
+
+<script>
+let adminPwd = '';
+
+function doLogin() {
+    const pwd = document.getElementById('adminPwd').value;
+    if (!pwd) { alert('请输入密码'); return; }
+    adminPwd = pwd;
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    listKeys();
+}
+
+function logout() {
+    adminPwd = '';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('loginPanel').style.display = 'block';
+    document.getElementById('adminPwd').value = '';
+}
+
+async function generateKeys() {
+    const type = document.getElementById('cardType').value;
+    const days = parseInt(document.getElementById('cardDays').value) || 1;
+    const count = parseInt(document.getElementById('cardCount').value) || 10;
+    const msgEl = document.getElementById('generateMsg');
+    msgEl.innerHTML = '';
+
+    try {
+        const resp = await fetch('/api/admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'generate', password: adminPwd, type, days, count })
+        });
+        const result = await resp.json();
+        if (!result.success) {
+            msgEl.innerHTML = '<div class="msg msg-error">' + result.msg + '</div>';
+            return;
+        }
+        msgEl.innerHTML = '<div class="msg msg-success">成功生成 ' + result.keys.length + ' 张卡密</div>';
+        const output = document.getElementById('keysOutput');
+        output.style.display = 'block';
+        let html = '';
+        let plainText = '';
+        result.keys.forEach((k, i) => {
+            const typeText = k.type === 'perm' ? '永久' : k.days + '天';
+            html += '<div class="key-item"><span class="key-plain" onclick="copyText(\'' + k.key + '\')" title="点击复制">' + k.key + '</span><span class="key-info">' + typeText + '</span></div>';
+            plainText += k.key + '\n';
+        });
+        html += '<div class="copy-all" onclick="copyText(\'' + plainText.replace(/\n/g,'\\n') + '\')">复制全部卡密</div>';
+        output.innerHTML = html;
+        listKeys();
+    } catch (e) {
+        msgEl.innerHTML = '<div class="msg msg-error">网络错误：' + e.message + '</div>';
+    }
+}
+
+async function listKeys() {
+    const msgEl = document.getElementById('listMsg');
+    const output = document.getElementById('listOutput');
+    msgEl.innerHTML = '';
+    output.innerHTML = '加载中...';
+
+    try {
+        const resp = await fetch('/api/admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'list', password: adminPwd })
+        });
+        const result = await resp.json();
+        if (!result.success) {
+            output.innerHTML = '<div class="msg msg-error">' + result.msg + '</div>';
+            return;
+        }
+        if (result.cards.length === 0) {
+            output.innerHTML = '<div style="color:#8a8a8a;text-align:center;padding:20px;">暂无卡密</div>';
+            return;
+        }
+        let html = '<div style="margin-bottom:10px;color:#8a8a8a;font-size:12px;">共 ' + result.total + ' 张卡密</div>';
+        html += '<table><tr><th>哈希（前16位）</th><th>类型</th><th>状态</th><th>操作</th></tr>';
+        result.cards.forEach(c => {
+            const typeText = c.type === 'perm' ? '永久' : c.days + '天';
+            const statusClass = c.device === '已激活' ? 'status-active' : 'status-inactive';
+            html += '<tr><td style="font-family:monospace;font-size:11px;">' + c.hash.substring(0,16) + '...</td><td>' + typeText + '</td><td class="' + statusClass + '">' + c.device + '</td><td><button class="btn btn-danger" style="padding:4px 8px;font-size:11px;" onclick="deleteKey(\'' + c.hash + '\')">删除</button></td></tr>';
+        });
+        html += '</table>';
+        output.innerHTML = html;
+    } catch (e) {
+        output.innerHTML = '<div class="msg msg-error">网络错误：' + e.message + '</div>';
+    }
+}
+
+async function deleteKey(hash) {
+    if (!confirm('确定删除这张卡密吗？')) return;
+    try {
+        await fetch('/api/admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', password: adminPwd, hash })
+        });
+        listKeys();
+    } catch (e) {
+        alert('删除失败：' + e.message);
+    }
+}
+
+function copyText(text) {
+    text = text.replace(/\\n/g, '\n');
+    navigator.clipboard.writeText(text).then(() => {
+        alert('已复制到剪贴板');
+    }).catch(() => {
+        alert('复制失败，请手动复制');
+    });
+}
+</script>
+</body>
+</html>

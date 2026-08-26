@@ -1,13 +1,8 @@
 {
   "name": "club-calculator",
   "version": "1.0.0",
-  "description": "俱乐部大玩家价值计算器 - 卡密验证系统",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "private": true,
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "@upstash/redis": "^1.28.0"
   }
 }
